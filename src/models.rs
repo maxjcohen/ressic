@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Article {
     pub title: String,
     pub content: String,
