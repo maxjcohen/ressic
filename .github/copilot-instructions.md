@@ -47,6 +47,10 @@ Design a minimal, self-hosted web service allowing clients to POST article data 
 
 - Develop using test driven approach
 - Always add or edit small features at a time, wait for test validation before moving to the next one.
+- When running `cargo` or `git` commands, do not use `cd` before, execute the
+  command in the current working directory.
+- Build the project using exactly `cargo build`.
+- Test the project using exactly `cargo test`.
 
 
 ## Key Project Conventions
