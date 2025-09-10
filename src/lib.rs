@@ -17,7 +17,7 @@ impl<S: FeedStorage> Client<S> {
     }
 
     pub fn get_articles(&self) -> Vec<Article> {
-        vec![Article::new_empty()]
+        self.storage.get_all_articles()
     }
 
     pub fn generate_feed(&self) -> String {
