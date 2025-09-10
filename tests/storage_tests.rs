@@ -59,6 +59,27 @@ fn assert_latest_is_most_recent<S: FeedStorage>(mut storage: S) {
     assert_eq!(latest, expected);
 }
 
+// When storing an article in one feed, another feed should remain empty.
+// This is extracted into a generic helper to match the other tests' style.
+fn assert_isolated_between_feeds<S: FeedStorage>(mut storage: S) {
+    storage.store_article(
+        "feed_one",
+        Article {
+            title: "unique".into(),
+            content: "body".into(),
+            id: 100,
+        },
+    );
+
+    // Read from a different feed; expect no articles.
+    let articles = storage.get_all_articles("feed_two");
+    assert_eq!(
+        articles.len(),
+        0,
+        "expected no articles in a different feed"
+    );
+}
+
 // Run the above expectations against the current MockStorage.
 #[test]
 fn mock_storage_store_then_get_all() {
@@ -70,4 +91,10 @@ fn mock_storage_store_then_get_all() {
 fn mock_storage_latest_most_recent() {
     let storage = MockStorage {};
     assert_latest_is_most_recent(storage);
+}
+
+#[test]
+fn mock_storage_isolated_between_feeds() {
+    let storage = MockStorage {};
+    assert_isolated_between_feeds(storage);
 }
