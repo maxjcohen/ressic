@@ -12,7 +12,7 @@ impl<S: FeedStorage> Client<S> {
         Client { storage: storage }
     }
 
-    pub fn store_article(&self, article: Article) {
+    pub fn store_article(&mut self, article: Article) {
         self.storage.store_article(article);
     }
 

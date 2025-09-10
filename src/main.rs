@@ -4,7 +4,7 @@ fn main() {
     // Load storage
     let storage = MockStorage {};
     // Load client
-    let client = Client::new(storage);
+    let mut client = Client::new(storage);
     // Load new article
     let article = Article{
             title: String::from("Title"),
