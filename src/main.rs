@@ -2,7 +2,7 @@ use ressic::{models::Article, storage::MockStorage, Client};
 
 fn main() {
     // Load storage
-    let storage = MockStorage {};
+    let storage = MockStorage::new();
     // Load client
     let mut client = Client::new(storage);
     // Load new article
@@ -14,5 +14,5 @@ fn main() {
     // Print it
     println!("Should work:\n {:?}", article);
     // Store it
-    client.store_article(article);
+    client.store_article("default", article);
 }
