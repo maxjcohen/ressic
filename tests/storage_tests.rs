@@ -1,11 +1,10 @@
-// Storage tests for FeedStorage trait. Test storing articles and retrieving them.
-
-use std::fs;
+mod common;
 
 use ressic::{
     models::Article,
-    storage::{FeedStorage, LocalFile, StorageError},
+    storage::{FeedStorage, StorageError},
 };
+use crate::common::with_localfile_storage;
 
 // After storing an article, storage.get_all_articles() should return it.
 fn assert_store_then_get_all<S: FeedStorage>(mut storage: S) {
@@ -145,46 +144,35 @@ fn assert_deduplication<S: FeedStorage>(mut storage: S) {
 
 #[test]
 fn localfile_store_then_get_all() {
-    let base = "./feeds-test/store_then_get_all";
-    let _ = fs::remove_dir_all(base);
-    let storage = LocalFile::new(base).expect("failed to create LocalFile");
-    assert_store_then_get_all(storage);
-    let _ = fs::remove_dir_all(base);
+    with_localfile_storage("store_then_get_all", |storage| {
+        assert_store_then_get_all(storage);
+    });
 }
 
 #[test]
 fn localfile_latest_most_recent() {
-    let base = "./feeds-test/latest_most_recent";
-    let _ = fs::remove_dir_all(base);
-    let storage = LocalFile::new(base).expect("failed to create LocalFile");
-    assert_latest_is_most_recent(storage);
-    let _ = fs::remove_dir_all(base);
+    with_localfile_storage("latest_most_recent", |storage| {
+        assert_latest_is_most_recent(storage);
+    });
 }
 
 #[test]
 fn localfile_empty_feed_error() {
-    let base = "./feeds-test/empty_feed_error";
-    let _ = fs::remove_dir_all(base);
-    let storage = LocalFile::new(base).expect("failed to create LocalFile");
-    assert_empty_feed_error(storage);
-    let _ = fs::remove_dir_all(base);
+    with_localfile_storage("empty_feed_error", |storage| {
+        assert_empty_feed_error(storage);
+    });
 }
 
 #[test]
 fn localfile_isolated_between_feeds() {
-    let base = "./feeds-test/isolated_between_feeds";
-    let _ = fs::remove_dir_all(base);
-    let storage = LocalFile::new(base).expect("failed to create LocalFile");
-    assert_isolated_between_feeds(storage);
-    let _ = fs::remove_dir_all(base);
+    with_localfile_storage("isolated_between_feeds", |storage| {
+        assert_isolated_between_feeds(storage);
+    });
 }
 
 #[test]
 fn localfile_deduplication() {
-    let base = "./feeds-test/deduplication";
-    let _ = fs::remove_dir_all(base);
-    let storage = LocalFile::new(base).expect("failed to create LocalFile");
-    assert_deduplication(storage);
-    let _ = fs::remove_dir_all(base);
+    with_localfile_storage("deduplication", |storage| {
+        assert_deduplication(storage);
+    });
 }
-
