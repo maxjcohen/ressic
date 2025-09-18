@@ -95,6 +95,48 @@ fn assert_isolated_between_feeds<S: FeedStorage>(mut storage: S) {
     );
 }
 
+// Test deduplication when storing an article with the same id.
+fn assert_deduplication<S: FeedStorage>(mut storage: S) {
+    let title1 = "First title";
+    let content1 = "First content";
+    let id = 42;
+    storage
+        .store_article(
+            "test",
+            Article {
+                title: title1.into(),
+                content: content1.into(),
+                id,
+            },
+        )
+        .expect("store_article failed");
+
+    let title2 = "Second title";
+    let content2 = "Second content";
+    storage
+        .store_article(
+            "test",
+            Article {
+                title: title2.into(),
+                content: content2.into(),
+                id,
+            },
+        )
+        .expect("store_article failed");
+
+    let articles = storage
+        .get_all_articles("test")
+        .expect("get_all_articles failed");
+    // Expect only one article with the same id.
+    assert_eq!(articles.len(), 1, "expected exactly one stored article");
+    let expected = Article {
+        title: title2.into(),
+        content: content2.into(),
+        id,
+    };
+    assert_eq!(&articles[0], &expected);
+}
+
 #[test]
 fn localfile_store_then_get_all() {
     let base = "./feeds-test/store_then_get_all";
@@ -119,5 +161,14 @@ fn localfile_isolated_between_feeds() {
     let _ = fs::remove_dir_all(base);
     let storage = LocalFile::new(base).expect("failed to create LocalFile");
     assert_isolated_between_feeds(storage);
+    let _ = fs::remove_dir_all(base);
+}
+
+#[test]
+fn localfile_deduplication() {
+    let base = "./feeds-test/deduplication";
+    let _ = fs::remove_dir_all(base);
+    let storage = LocalFile::new(base).expect("failed to create LocalFile");
+    assert_deduplication(storage);
     let _ = fs::remove_dir_all(base);
 }
