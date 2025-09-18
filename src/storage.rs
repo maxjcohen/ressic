@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 pub enum StorageError {
     Io(std::io::Error),
     Json(serde_json::Error),
+    FeedEmpty,
 }
 
 impl From<std::io::Error> for StorageError {
@@ -109,7 +110,7 @@ impl FeedStorage for LocalFile {
         if let Some(last) = articles.last() {
             Ok(last.clone())
         } else {
-            Ok(Article::new_empty())
+            Err(StorageError::FeedEmpty)
         }
     }
 
@@ -141,11 +142,11 @@ impl MockStorage {
 
 impl FeedStorage for MockStorage {
     fn get_all_articles(&self, _feed: &str) -> Result<Vec<Article>, StorageError> {
-        Ok(vec![Article::new_empty()])
+        Ok(vec![])
     }
 
     fn get_latest_article(&self, _feed: &str) -> Result<Article, StorageError> {
-        Ok(Article::new_empty())
+        Err(StorageError::FeedEmpty)
     }
 
     fn store_article(&mut self, _feed: &str, _article: Article) -> Result<(), StorageError> {
