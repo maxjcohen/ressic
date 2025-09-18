@@ -4,7 +4,7 @@ use std::fs;
 
 use ressic::{
     models::Article,
-    storage::{FeedStorage, LocalFile},
+    storage::{FeedStorage, LocalFile, StorageError},
 };
 
 // After storing an article, storage.get_all_articles() should return it.
@@ -68,6 +68,12 @@ fn assert_latest_is_most_recent<S: FeedStorage>(mut storage: S) {
         .get_latest_article("test")
         .expect("get_latest_article failed");
     assert_eq!(latest, expected);
+}
+
+// Test that get_latest_article returns FeedEmpty error for empty feeds.
+fn assert_empty_feed_error<S: FeedStorage>(storage: S) {
+    let result = storage.get_latest_article("empty_feed");
+    assert!(matches!(result, Err(StorageError::FeedEmpty)));
 }
 
 // When storing an article in one feed, another feed should remain empty.
@@ -156,6 +162,15 @@ fn localfile_latest_most_recent() {
 }
 
 #[test]
+fn localfile_empty_feed_error() {
+    let base = "./feeds-test/empty_feed_error";
+    let _ = fs::remove_dir_all(base);
+    let storage = LocalFile::new(base).expect("failed to create LocalFile");
+    assert_empty_feed_error(storage);
+    let _ = fs::remove_dir_all(base);
+}
+
+#[test]
 fn localfile_isolated_between_feeds() {
     let base = "./feeds-test/isolated_between_feeds";
     let _ = fs::remove_dir_all(base);
@@ -172,3 +187,4 @@ fn localfile_deduplication() {
     assert_deduplication(storage);
     let _ = fs::remove_dir_all(base);
 }
+
