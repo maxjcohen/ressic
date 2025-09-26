@@ -1,32 +1,8 @@
-use super::models::Article;
+use super::{FeedStorage, StorageError};
+use crate::models::Article;
 use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
-
-#[derive(Debug)]
-pub enum StorageError {
-    Io(std::io::Error),
-    Json(serde_json::Error),
-    FeedEmpty,
-}
-
-impl From<std::io::Error> for StorageError {
-    fn from(e: std::io::Error) -> Self {
-        StorageError::Io(e)
-    }
-}
-
-impl From<serde_json::Error> for StorageError {
-    fn from(e: serde_json::Error) -> Self {
-        StorageError::Json(e)
-    }
-}
-
-pub trait FeedStorage {
-    fn get_all_articles(&self, feed: &str) -> Result<Vec<Article>, StorageError>;
-    fn get_latest_article(&self, feed: &str) -> Result<Article, StorageError>;
-    fn store_article(&mut self, feed: &str, article: Article) -> Result<(), StorageError>;
-}
 
 pub struct LocalFile {
     base_dir: PathBuf,
@@ -47,8 +23,6 @@ impl LocalFile {
         p
     }
 
-    // Advisory lock implementation: we'll open the file for append/read and rely on OS-level advisory behavior.
-    // Since we are avoiding extra deps, we won't enforce locking beyond opening with append when writing.
     fn read_all(&self, feed: &str) -> Result<Vec<Article>, StorageError> {
         let path = self.feed_path(feed);
         if !path.exists() {
@@ -129,27 +103,5 @@ impl FeedStorage for LocalFile {
             articles.push(article);
         }
         self.write_all(feed, &articles)
-    }
-}
-
-pub struct MockStorage {}
-
-impl MockStorage {
-    pub fn new() -> Self {
-        MockStorage {}
-    }
-}
-
-impl FeedStorage for MockStorage {
-    fn get_all_articles(&self, _feed: &str) -> Result<Vec<Article>, StorageError> {
-        Ok(vec![])
-    }
-
-    fn get_latest_article(&self, _feed: &str) -> Result<Article, StorageError> {
-        Err(StorageError::FeedEmpty)
-    }
-
-    fn store_article(&mut self, _feed: &str, _article: Article) -> Result<(), StorageError> {
-        Ok(())
     }
 }
