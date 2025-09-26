@@ -28,5 +28,5 @@ pub trait FeedStorage {
     fn store_article(&mut self, feed: &str, article: Article) -> Result<(), StorageError>;
 }
 
-pub use local::LocalFile;
+pub use local::JsonLocalStorage;
 pub use mock::MockStorage;

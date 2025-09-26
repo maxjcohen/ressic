@@ -4,17 +4,17 @@ use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
 
-pub struct LocalFile {
+pub struct JsonLocalStorage {
     base_dir: PathBuf,
 }
 
-impl LocalFile {
+impl JsonLocalStorage {
     pub fn new<P: AsRef<Path>>(base_dir: P) -> Result<Self, StorageError> {
         let p = base_dir.as_ref().to_path_buf();
         if !p.exists() {
             std::fs::create_dir_all(&p)?;
         }
-        Ok(LocalFile { base_dir: p })
+        Ok(JsonLocalStorage { base_dir: p })
     }
 
     fn feed_path(&self, feed: &str) -> PathBuf {
@@ -72,7 +72,7 @@ impl LocalFile {
     }
 }
 
-impl FeedStorage for LocalFile {
+impl FeedStorage for JsonLocalStorage {
     fn get_all_articles(&self, feed: &str) -> Result<Vec<Article>, StorageError> {
         let articles = self.read_all(feed)?;
         // Return in insertion order

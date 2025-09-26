@@ -1,8 +1,8 @@
-use ressic::{models::Article, storage::LocalFile, Client};
+use ressic::{models::Article, storage::JsonLocalStorage, Client};
 
 fn main() {
     // Load storage
-    let storage = LocalFile::new("./feeds").unwrap();
+    let storage = JsonLocalStorage::new("./feeds").unwrap();
     // Load client
     let mut client = Client::new(storage);
     // Load new article
