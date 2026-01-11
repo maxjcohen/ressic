@@ -1,9 +1,14 @@
 use super::{FeedStorage, StorageError};
 use crate::models::Article;
 
+/// Mock storage implementation for testing.
+///
+/// This implementation doesn't persist any data and is useful
+/// for unit tests that don't require actual storage.
 pub struct MockStorage {}
 
 impl MockStorage {
+    /// Creates a new mock storage instance.
     pub fn new() -> Self {
         MockStorage {}
     }

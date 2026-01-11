@@ -4,11 +4,27 @@ use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
 
+/// Local file-based storage implementation using JSONL format.
+///
+/// Each feed is stored as a separate `.jsonl` file where each line
+/// contains a JSON-serialized article. This provides simple, portable
+/// storage without external dependencies.
 pub struct JsonLocalStorage {
     base_dir: PathBuf,
 }
 
 impl JsonLocalStorage {
+    /// Creates a new local storage instance.
+    ///
+    /// The base directory will be created if it doesn't exist.
+    ///
+    /// # Arguments
+    ///
+    /// * `base_dir` - The directory where feed files will be stored
+    ///
+    /// # Errors
+    ///
+    /// Returns `StorageError::Io` if the directory cannot be created.
     pub fn new<P: AsRef<Path>>(base_dir: P) -> Result<Self, StorageError> {
         let p = base_dir.as_ref().to_path_buf();
         if !p.exists() {

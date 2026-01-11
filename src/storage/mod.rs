@@ -3,10 +3,14 @@ use crate::models::Article;
 pub mod local;
 pub mod mock;
 
+/// Errors that can occur during feed storage operations.
 #[derive(Debug)]
 pub enum StorageError {
+    /// An I/O error occurred while reading or writing feed data.
     Io(std::io::Error),
+    /// A JSON serialization/deserialization error occurred.
     Json(serde_json::Error),
+    /// The requested feed contains no articles.
     FeedEmpty,
 }
 
@@ -22,9 +26,24 @@ impl From<serde_json::Error> for StorageError {
     }
 }
 
+/// Trait for feed storage backends.
+///
+/// Implementations of this trait provide persistent storage for RSS feed articles.
+/// Multiple storage backends can be implemented (e.g., local files, databases).
 pub trait FeedStorage {
+    /// Retrieves all articles from the specified feed.
+    ///
+    /// Returns an empty vector if the feed doesn't exist.
     fn get_all_articles(&self, feed: &str) -> Result<Vec<Article>, StorageError>;
+
+    /// Retrieves the most recently added article from the specified feed.
+    ///
+    /// Returns `StorageError::FeedEmpty` if the feed has no articles.
     fn get_latest_article(&self, feed: &str) -> Result<Article, StorageError>;
+
+    /// Stores an article in the specified feed.
+    ///
+    /// If an article with the same ID already exists, it will be replaced.
     fn store_article(&mut self, feed: &str, article: Article) -> Result<(), StorageError>;
 }
 
