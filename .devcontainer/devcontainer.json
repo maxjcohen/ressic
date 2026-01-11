@@ -1,0 +1,12 @@
+{
+    "name": "Ressic Rust Development",
+    "image": "docker.io/rust:1.92-trixie",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rust-lang.rust-analyzer"
+            ]
+        }
+    },
+    "postCreateCommand": "rustc --version && cargo --version"
+}
