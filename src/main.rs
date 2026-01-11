@@ -9,7 +9,7 @@ fn main() {
     let article = Article{
             title: String::from("Title"),
             content: String::from("This is some content"),
-            id: 1,
+            id: String::from("1"),
     };
     // Print it
     println!("Should work:\n {:?}", article);

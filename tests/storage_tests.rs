@@ -10,14 +10,14 @@ use crate::common::with_localfile_storage;
 fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
     let title = "Real title";
     let content = "Real content";
-    let id = 42;
+    let id = "42";
     storage
         .store_article(
             "test",
             Article {
                 title: title.into(),
                 content: content.into(),
-                id,
+                id: id.into(),
             },
         )
         .expect("store_article failed");
@@ -30,7 +30,7 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
     let expected = Article {
         title: title.into(),
         content: content.into(),
-        id,
+        id: id.into(),
     };
     assert_eq!(&articles[0], &expected);
 }
@@ -43,7 +43,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
             Article {
                 title: "first".into(),
                 content: "c1".into(),
-                id: 1,
+                id: "1".into(),
             },
         )
         .expect("store_article failed");
@@ -53,7 +53,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
             Article {
                 title: "second".into(),
                 content: "c2".into(),
-                id: 2,
+                id: "2".into(),
             },
         )
         .expect("store_article failed");
@@ -61,7 +61,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
     let expected = Article {
         title: "second".into(),
         content: "c2".into(),
-        id: 2,
+        id: "2".into(),
     };
     let latest = storage
         .get_latest_article("test")
@@ -84,7 +84,7 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
             Article {
                 title: "unique".into(),
                 content: "body".into(),
-                id: 100,
+                id: "100".into(),
             },
         )
         .expect("store_article failed");
@@ -104,14 +104,14 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
 fn assert_deduplication<S: FeedStorage>(storage: S) {
     let title1 = "First title";
     let content1 = "First content";
-    let id = 42;
+    let id = "42";
     storage
         .store_article(
             "test",
             Article {
                 title: title1.into(),
                 content: content1.into(),
-                id,
+                id: id.into(),
             },
         )
         .expect("store_article failed");
@@ -124,7 +124,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
             Article {
                 title: title2.into(),
                 content: content2.into(),
-                id,
+                id: id.into(),
             },
         )
         .expect("store_article failed");
@@ -137,7 +137,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
     let expected = Article {
         title: title2.into(),
         content: content2.into(),
-        id,
+        id: id.into(),
     };
     assert_eq!(&articles[0], &expected);
 }

@@ -9,5 +9,6 @@ pub struct Article {
     /// The main content/body of the article.
     pub content: String,
     /// Unique identifier for the article within a feed.
-    pub id: u32,
+    /// Supports arbitrary strings for UUIDs, URLs, or custom ID schemes.
+    pub id: String,
 }
