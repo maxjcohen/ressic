@@ -176,3 +176,39 @@ fn localfile_deduplication() {
         assert_deduplication(storage);
     });
 }
+
+// Test that invalid feed names are rejected
+fn assert_invalid_feed_names<S: FeedStorage>(storage: S) {
+    let invalid_names = vec![
+        "../etc/passwd",
+        "../../sensitive",
+        "./hidden",
+        "path/with/slash",
+        "path\\with\\backslash",
+        "",
+        ".hidden",
+    ];
+
+    for name in invalid_names {
+        let result = storage.store_article(
+            name,
+            Article {
+                title: "test".into(),
+                content: "test".into(),
+                id: "1".into(),
+            },
+        );
+        assert!(
+            matches!(result, Err(StorageError::InvalidFeedName(_))),
+            "Expected InvalidFeedName error for feed name: {}",
+            name
+        );
+    }
+}
+
+#[test]
+fn localfile_rejects_invalid_feed_names() {
+    with_localfile_storage("invalid_names", |storage| {
+        assert_invalid_feed_names(storage);
+    });
+}

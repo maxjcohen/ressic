@@ -12,6 +12,8 @@ pub enum StorageError {
     Json(serde_json::Error),
     /// The requested feed contains no articles.
     FeedEmpty,
+    /// The feed name contains invalid characters or is unsafe.
+    InvalidFeedName(String),
 }
 
 impl From<std::io::Error> for StorageError {

@@ -33,14 +33,56 @@ impl JsonLocalStorage {
         Ok(JsonLocalStorage { base_dir: p })
     }
 
-    fn feed_path(&self, feed: &str) -> PathBuf {
+    /// Validates that a feed name is safe for use in file paths.
+    ///
+    /// Prevents path traversal attacks by rejecting feed names containing:
+    /// - Path separators (/, \)
+    /// - Parent directory references (..)
+    /// - Hidden files (.)
+    /// - Control characters
+    /// - Empty strings
+    fn validate_feed_name(feed: &str) -> Result<(), StorageError> {
+        if feed.is_empty() {
+            return Err(StorageError::InvalidFeedName(
+                "Feed name cannot be empty".to_string(),
+            ));
+        }
+
+        // Reject if contains path separators or parent references
+        if feed.contains('/') || feed.contains('\\') || feed.contains("..") {
+            return Err(StorageError::InvalidFeedName(format!(
+                "Feed name contains invalid path characters: {}",
+                feed
+            )));
+        }
+
+        // Reject if starts with dot (hidden files)
+        if feed.starts_with('.') {
+            return Err(StorageError::InvalidFeedName(format!(
+                "Feed name cannot start with '.': {}",
+                feed
+            )));
+        }
+
+        // Reject control characters and non-printable ASCII
+        if feed.chars().any(|c| c.is_control()) {
+            return Err(StorageError::InvalidFeedName(
+                "Feed name contains control characters".to_string(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    fn feed_path(&self, feed: &str) -> Result<PathBuf, StorageError> {
+        Self::validate_feed_name(feed)?;
         let mut p = self.base_dir.clone();
         p.push(format!("{}.jsonl", feed));
-        p
+        Ok(p)
     }
 
     fn read_all(&self, feed: &str) -> Result<Vec<Article>, StorageError> {
-        let path = self.feed_path(feed);
+        let path = self.feed_path(feed)?;
         if !path.exists() {
             return Ok(vec![]);
         }
@@ -60,7 +102,7 @@ impl JsonLocalStorage {
     }
 
     fn write_all(&self, feed: &str, articles: &[Article]) -> Result<(), StorageError> {
-        let path = self.feed_path(feed);
+        let path = self.feed_path(feed)?;
         let tmp_path = path.with_extension("jsonl.tmp");
 
         if let Some(parent) = tmp_path.parent() {
