@@ -104,7 +104,7 @@ impl FeedStorage for JsonLocalStorage {
         }
     }
 
-    fn store_article(&mut self, feed: &str, article: Article) -> Result<(), StorageError> {
+    fn store_article(&self, feed: &str, article: Article) -> Result<(), StorageError> {
         // Read existing, dedupe by id, update or append, then rewrite file
         let mut articles = self.read_all(feed)?;
         let mut replaced = false;

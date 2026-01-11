@@ -35,16 +35,16 @@ pub trait FeedStorage {
     ///
     /// Returns an empty vector if the feed doesn't exist.
     fn get_all_articles(&self, feed: &str) -> Result<Vec<Article>, StorageError>;
-
+    
     /// Retrieves the most recently added article from the specified feed.
     ///
     /// Returns `StorageError::FeedEmpty` if the feed has no articles.
     fn get_latest_article(&self, feed: &str) -> Result<Article, StorageError>;
-
+    
     /// Stores an article in the specified feed.
     ///
     /// If an article with the same ID already exists, it will be replaced.
-    fn store_article(&mut self, feed: &str, article: Article) -> Result<(), StorageError>;
+    fn store_article(&self, feed: &str, article: Article) -> Result<(), StorageError>;
 }
 
 pub use local::JsonLocalStorage;

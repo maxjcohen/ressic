@@ -7,7 +7,7 @@ use ressic::{
 use crate::common::with_localfile_storage;
 
 // After storing an article, storage.get_all_articles() should return it.
-fn assert_store_then_get_all<S: FeedStorage>(mut storage: S) {
+fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
     let title = "Real title";
     let content = "Real content";
     let id = 42;
@@ -36,7 +36,7 @@ fn assert_store_then_get_all<S: FeedStorage>(mut storage: S) {
 }
 
 // After storing multiple articles, get_latest_article() should return the most recent one.
-fn assert_latest_is_most_recent<S: FeedStorage>(mut storage: S) {
+fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
     storage
         .store_article(
             "test",
@@ -77,7 +77,7 @@ fn assert_empty_feed_error<S: FeedStorage>(storage: S) {
 
 // When storing an article in one feed, another feed should remain empty.
 // This is extracted into a generic helper to match the other tests' style.
-fn assert_isolated_between_feeds<S: FeedStorage>(mut storage: S) {
+fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
     storage
         .store_article(
             "feed_one",
@@ -101,7 +101,7 @@ fn assert_isolated_between_feeds<S: FeedStorage>(mut storage: S) {
 }
 
 // Test deduplication when storing an article with the same id.
-fn assert_deduplication<S: FeedStorage>(mut storage: S) {
+fn assert_deduplication<S: FeedStorage>(storage: S) {
     let title1 = "First title";
     let content1 = "First content";
     let id = 42;

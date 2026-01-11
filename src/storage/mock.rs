@@ -23,7 +23,7 @@ impl FeedStorage for MockStorage {
         Err(StorageError::FeedEmpty)
     }
 
-    fn store_article(&mut self, _feed: &str, _article: Article) -> Result<(), StorageError> {
+    fn store_article(&self, _feed: &str, _article: Article) -> Result<(), StorageError> {
         Ok(())
     }
 }
