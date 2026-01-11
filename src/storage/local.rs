@@ -97,25 +97,18 @@ impl FeedStorage for JsonLocalStorage {
 
     fn get_latest_article(&self, feed: &str) -> Result<Article, StorageError> {
         let articles = self.read_all(feed)?;
-        if let Some(last) = articles.last() {
-            Ok(last.clone())
-        } else {
-            Err(StorageError::FeedEmpty)
-        }
+        articles
+            .into_iter()
+            .last()
+            .ok_or(StorageError::FeedEmpty)
     }
 
     fn store_article(&self, feed: &str, article: Article) -> Result<(), StorageError> {
         // Read existing, dedupe by id, update or append, then rewrite file
         let mut articles = self.read_all(feed)?;
-        let mut replaced = false;
-        for a in articles.iter_mut() {
-            if a.id == article.id {
-                *a = article.clone();
-                replaced = true;
-                break;
-            }
-        }
-        if !replaced {
+        if let Some(a) = articles.iter_mut().find(|a| a.id == article.id) {
+            *a = article;
+        } else {
             articles.push(article);
         }
         self.write_all(feed, &articles)
