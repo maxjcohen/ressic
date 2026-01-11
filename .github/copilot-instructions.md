@@ -71,3 +71,4 @@ Ressic is a minimal, self-hosted web service allowing clients to POST article da
 - Use clear, single-responsibility functions
 - Trust these instructions; search or explore the codebase only if unclear
 - Do not use emojis under any circumstance
+- Before anything, always ask for clarification if unsure about any aspect of the project. Never make assumptions.
