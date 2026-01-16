@@ -1,7 +1,7 @@
 /// Represents an article in an RSS feed.
 ///
 /// An article contains the essential information needed for RSS feed generation:
-/// title, content, unique identifier, and URL.
+/// title, content, unique identifier, URL, and publication date.
 #[derive(Debug, PartialEq, Eq, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Article {
     /// The title of the article.
@@ -13,4 +13,6 @@ pub struct Article {
     pub id: String,
     /// The URL linking to the original article source.
     pub url: String,
+    /// The publication date and time of the article (UTC).
+    pub pub_date: chrono::DateTime<chrono::Utc>,
 }

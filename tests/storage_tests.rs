@@ -1,5 +1,6 @@
 mod common;
 
+use chrono::Utc;
 use ressic::{
     models::Article,
     storage::{FeedStorage, StorageError},
@@ -11,6 +12,7 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
     let title = "Real title";
     let content = "Real content";
     let id = "42";
+    let pub_date = Utc::now();
     storage
         .store_article(
             "test",
@@ -19,6 +21,7 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
                 content: content.into(),
                 id: id.into(),
                 url: "https://example.com/article".into(),
+                pub_date,
             },
         )
         .expect("store_article failed");
@@ -33,12 +36,14 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
         content: content.into(),
         id: id.into(),
         url: "https://example.com/article".into(),
+        pub_date,
     };
     assert_eq!(&articles[0], &expected);
 }
 
 // After storing multiple articles, get_latest_article() should return the most recent one.
 fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
+    let pub_date1 = Utc::now();
     storage
         .store_article(
             "test",
@@ -47,9 +52,11 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
                 content: "c1".into(),
                 id: "1".into(),
                 url: "https://example.com/1".into(),
+                pub_date: pub_date1,
             },
         )
         .expect("store_article failed");
+    let pub_date2 = Utc::now();
     storage
         .store_article(
             "test",
@@ -58,6 +65,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
                 content: "c2".into(),
                 id: "2".into(),
                 url: "https://example.com/2".into(),
+                pub_date: pub_date2,
             },
         )
         .expect("store_article failed");
@@ -67,6 +75,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
         content: "c2".into(),
         id: "2".into(),
         url: "https://example.com/2".into(),
+        pub_date: pub_date2,
     };
     let latest = storage
         .get_latest_article("test")
@@ -91,6 +100,7 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
                 content: "body".into(),
                 id: "100".into(),
                 url: "https://example.com/unique".into(),
+                pub_date: Utc::now(),
             },
         )
         .expect("store_article failed");
@@ -111,6 +121,7 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
 // but different IDs should result in only one article (the most recent).
 fn assert_deduplication<S: FeedStorage>(storage: S) {
     let url = "https://example.com/article";
+    let pub_date1 = Utc::now();
     
     // Store first article with id "1"
     storage
@@ -121,10 +132,12 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
                 content: "First content".into(),
                 id: "1".into(),
                 url: url.into(),
+                pub_date: pub_date1,
             },
         )
         .expect("store_article failed");
 
+    let pub_date2 = Utc::now();
     // Store second article with same URL but different id "2"
     storage
         .store_article(
@@ -134,6 +147,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
                 content: "Second content".into(),
                 id: "2".into(),
                 url: url.into(),
+                pub_date: pub_date2,
             },
         )
         .expect("store_article failed");
@@ -151,6 +165,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
         content: "Second content".into(),
         id: "2".into(),
         url: url.into(),
+        pub_date: pub_date2,
     };
     assert_eq!(&articles[0], &expected);
 }
@@ -210,6 +225,7 @@ fn assert_invalid_feed_names<S: FeedStorage>(storage: S) {
                 content: "test".into(),
                 id: "1".into(),
                 url: "https://example.com/test".into(),
+                pub_date: Utc::now(),
             },
         );
         assert!(

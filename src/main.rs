@@ -1,4 +1,5 @@
 use ressic::{models::Article, storage::JsonLocalStorage, Client};
+use chrono::Utc;
 
 fn main() {
     // Load storage
@@ -11,6 +12,7 @@ fn main() {
             content: String::from("This is some content"),
             id: String::from("1"),
             url: String::from("https://example.com/article/1"),
+            pub_date: Utc::now(),
     };
     // Print it
     println!("Should work:\n {:?}", article);
