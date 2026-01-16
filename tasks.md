@@ -1,17 +1,6 @@
 # Tasks
 
 ## Stabilize
-  - Add unit tests that assert proper error is returned when call get_latest_article for empty feeds.
-
-- Data model improvements
-  - Add `url: String` to `Article` and migrate tests/examples.
-  - Update deduplication to use `url` (and keep id optional/auxiliary).
-
-- Data model improvements
-  - Add `pub_date: datetime` to `Article` using the `chrono` crate.
-  - Update `get_latests_article` to retrieve last based on `pub_date`.
-
-
 - Data model improvements
   - Add `summary: String` to `Article`.
 

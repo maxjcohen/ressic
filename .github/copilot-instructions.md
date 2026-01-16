@@ -57,8 +57,8 @@ Ressic is a minimal, self-hosted web service allowing clients to POST article da
   3. Check that these tests fail with `cargo test`
   4. Write a minimal implementation for the feature that makes the tests pass
   5. Refactor the implementation if necessary, ensuring tests still pass
-  6. Update the documentation if needed (comments, README, copilot-instructions.md, etc.)
-  7. Commit the changes
+  6. Update the documentation if needed (comments, README, tasks.md, copilot-instructions.md, etc.)
+  7. Commit the changes, adding only relevant files to the commit (avoid `git add -A`)
 - When running `cargo` or `git` commands, do not use `cd` before, execute the
   command in the current working directory.
 
