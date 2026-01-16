@@ -4,11 +4,36 @@ use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
 
-/// Local file-based storage implementation using JSONL format.
+/// A JSON-based local file storage implementation for RSS feed articles.
 ///
-/// Each feed is stored as a separate `.jsonl` file where each line
-/// contains a JSON-serialized article. This provides simple, portable
-/// storage without external dependencies.
+/// This storage backend persists articles to the local filesystem using JSON Lines (JSONL) format,
+/// where each line in a file represents a single serialized article. Each feed is stored in a
+/// separate file named `{feed_name}.jsonl` within the configured base directory.
+///
+/// # File Format
+///
+/// Articles are stored in JSON Lines format (one JSON object per line), which allows for:
+/// - Efficient appending of new articles
+/// - Easy line-by-line parsing without loading entire files into memory
+/// - Simple recovery from partial writes
+///
+/// # Security
+///
+/// Feed names are validated to prevent path traversal attacks. Invalid feed names will be rejected
+/// during operations. See [`validate_feed_name`](Self::validate_feed_name) for validation rules.
+///
+/// # Thread Safety
+///
+/// This implementation is not thread-safe. Concurrent access to the same feed from multiple
+/// threads or processes may result in data corruption or race conditions.
+///
+/// # Example
+///
+/// ```no_run
+/// use ressic::storage::local::JsonLocalStorage;
+///
+/// let storage = JsonLocalStorage::new("/path/to/feeds").unwrap();
+/// ```
 pub struct JsonLocalStorage {
     base_dir: PathBuf,
 }
