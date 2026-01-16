@@ -146,9 +146,9 @@ impl FeedStorage for JsonLocalStorage {
     }
 
     fn store_article(&self, feed: &str, article: Article) -> Result<(), StorageError> {
-        // Read existing, dedupe by id, update or append, then rewrite file
+        // Read existing, dedupe by url, update or append, then rewrite file
         let mut articles = self.read_all(feed)?;
-        if let Some(a) = articles.iter_mut().find(|a| a.id == article.id) {
+        if let Some(a) = articles.iter_mut().find(|a| a.url == article.url) {
             *a = article;
         } else {
             articles.push(article);

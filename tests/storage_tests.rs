@@ -106,33 +106,34 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
     );
 }
 
-// Test deduplication when storing an article with the same id.
+// Test deduplication when storing an article with the same URL.
+// Articles are deduplicated by URL, not by ID. Two articles with the same URL
+// but different IDs should result in only one article (the most recent).
 fn assert_deduplication<S: FeedStorage>(storage: S) {
-    let title1 = "First title";
-    let content1 = "First content";
-    let id = "42";
+    let url = "https://example.com/article";
+    
+    // Store first article with id "1"
     storage
         .store_article(
             "test",
             Article {
-                title: title1.into(),
-                content: content1.into(),
-                id: id.into(),
-                url: "https://example.com/first".into(),
+                title: "First title".into(),
+                content: "First content".into(),
+                id: "1".into(),
+                url: url.into(),
             },
         )
         .expect("store_article failed");
 
-    let title2 = "Second title";
-    let content2 = "Second content";
+    // Store second article with same URL but different id "2"
     storage
         .store_article(
             "test",
             Article {
-                title: title2.into(),
-                content: content2.into(),
-                id: id.into(),
-                url: "https://example.com/second".into(),
+                title: "Second title".into(),
+                content: "Second content".into(),
+                id: "2".into(),
+                url: url.into(),
             },
         )
         .expect("store_article failed");
@@ -140,13 +141,16 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
     let articles = storage
         .get_all_articles("test")
         .expect("get_all_articles failed");
-    // Expect only one article with the same id.
-    assert_eq!(articles.len(), 1, "expected exactly one stored article");
+    
+    // Expect only one article because they have the same URL
+    assert_eq!(articles.len(), 1, "expected exactly one article after deduplication by URL");
+    
+    // The second article should have replaced the first
     let expected = Article {
-        title: title2.into(),
-        content: content2.into(),
-        id: id.into(),
-        url: "https://example.com/second".into(),
+        title: "Second title".into(),
+        content: "Second content".into(),
+        id: "2".into(),
+        url: url.into(),
     };
     assert_eq!(&articles[0], &expected);
 }

@@ -45,7 +45,7 @@ pub trait FeedStorage {
     
     /// Stores an article in the specified feed.
     ///
-    /// If an article with the same ID already exists, it will be replaced.
+    /// If an article with the same URL already exists, it will be replaced.
     fn store_article(&self, feed: &str, article: Article) -> Result<(), StorageError>;
 }
 
