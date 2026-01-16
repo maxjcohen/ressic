@@ -8,7 +8,7 @@ pub mod models;
 pub mod storage;
 
 use crate::{
-    generator::FeedGenerator,
+    generator::{FeedGenerator, GeneratorError},
     models::Article,
     storage::{FeedStorage, StorageError},
 };
@@ -54,7 +54,8 @@ impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {
     }
 
     /// Generates an RSS feed (not yet implemented).
-    pub fn generate_feed(&self) -> String {
-        String::from("")
+    pub fn generate_feed(&self, feed_name: &str) -> Result<String, GeneratorError> {
+        self.generator
+            .generate(&self.storage.get_feed(feed_name).unwrap())
     }
 }
