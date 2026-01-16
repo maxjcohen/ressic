@@ -13,6 +13,8 @@ pub struct Article {
     pub id: String,
     /// The URL linking to the original article source.
     pub url: String,
+    /// A brief summary or description of the article.
+    pub summary: String,
     /// The publication date and time of the article (UTC).
     pub pub_date: chrono::DateTime<chrono::Utc>,
 }

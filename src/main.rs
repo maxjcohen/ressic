@@ -12,6 +12,7 @@ fn main() {
             content: String::from("This is some content"),
             id: String::from("1"),
             url: String::from("https://example.com/article/1"),
+            summary: String::from("A brief summary"),
             pub_date: Utc::now(),
     };
     // Print it

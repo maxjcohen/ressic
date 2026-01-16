@@ -21,6 +21,7 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
                 content: content.into(),
                 id: id.into(),
                 url: "https://example.com/article".into(),
+                summary: "Test summary".into(),
                 pub_date,
             },
         )
@@ -36,6 +37,7 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
         content: content.into(),
         id: id.into(),
         url: "https://example.com/article".into(),
+        summary: "Test summary".into(),
         pub_date,
     };
     assert_eq!(&articles[0], &expected);
@@ -58,6 +60,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
                 content: "c1".into(),
                 id: "1".into(),
                 url: "https://example.com/1".into(),
+                summary: "summary1".into(),
                 pub_date: pub_date1,
             },
         )
@@ -72,6 +75,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
                 content: "c2".into(),
                 id: "2".into(),
                 url: "https://example.com/2".into(),
+                summary: "summary2".into(),
                 pub_date: pub_date2,
             },
         )
@@ -86,6 +90,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
                 content: "c3".into(),
                 id: "3".into(),
                 url: "https://example.com/3".into(),
+                summary: "summary3".into(),
                 pub_date: pub_date3,
             },
         )
@@ -97,6 +102,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
         content: "c2".into(),
         id: "2".into(),
         url: "https://example.com/2".into(),
+        summary: "summary2".into(),
         pub_date: pub_date2,
     };
     let latest = storage
@@ -122,6 +128,7 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
                 content: "body".into(),
                 id: "100".into(),
                 url: "https://example.com/unique".into(),
+                summary: "unique summary".into(),
                 pub_date: Utc.with_ymd_and_hms(2024, 2, 1, 12, 0, 0).unwrap(),
             },
         )
@@ -154,6 +161,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
                 content: "First content".into(),
                 id: "1".into(),
                 url: url.into(),
+                summary: "First summary".into(),
                 pub_date: pub_date1,
             },
         )
@@ -169,6 +177,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
                 content: "Second content".into(),
                 id: "2".into(),
                 url: url.into(),
+                summary: "Second summary".into(),
                 pub_date: pub_date2,
             },
         )
@@ -187,6 +196,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
         content: "Second content".into(),
         id: "2".into(),
         url: url.into(),
+        summary: "Second summary".into(),
         pub_date: pub_date2,
     };
     assert_eq!(&articles[0], &expected);
@@ -247,6 +257,7 @@ fn assert_invalid_feed_names<S: FeedStorage>(storage: S) {
                 content: "test".into(),
                 id: "1".into(),
                 url: "https://example.com/test".into(),
+                summary: "test summary".into(),
                 pub_date: Utc.with_ymd_and_hms(2024, 4, 1, 14, 0, 0).unwrap(),
             },
         );
