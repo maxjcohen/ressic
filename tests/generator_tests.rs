@@ -1,5 +1,5 @@
 use chrono::{TimeZone, Utc};
-use ressic::generator::{FeedGenerator, PlainText};
+use ressic::generator::{FeedGenerator, PlainText, Rss20};
 use ressic::models::{Article, Feed};
 
 #[test]
@@ -37,4 +37,5 @@ fn test_generator() {
     };
 
     assert!(test_generate(&PlainText::new(), &feed).is_ok());
+    assert!(test_generate(&Rss20::new(), &feed).is_ok());
 }

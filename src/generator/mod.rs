@@ -2,6 +2,7 @@ use crate::models::Feed;
 
 pub mod mock;
 pub mod plain_text;
+pub mod rss20;
 
 /// Errors that can occur during feed generation operations.
 #[derive(Debug)]
@@ -49,3 +50,4 @@ pub trait FeedGenerator {
 
 pub use mock::Mock;
 pub use plain_text::PlainText;
+pub use rss20::Rss20;
