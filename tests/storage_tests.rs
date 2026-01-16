@@ -18,6 +18,7 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
                 title: title.into(),
                 content: content.into(),
                 id: id.into(),
+                url: "https://example.com/article".into(),
             },
         )
         .expect("store_article failed");
@@ -31,6 +32,7 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
         title: title.into(),
         content: content.into(),
         id: id.into(),
+        url: "https://example.com/article".into(),
     };
     assert_eq!(&articles[0], &expected);
 }
@@ -44,6 +46,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
                 title: "first".into(),
                 content: "c1".into(),
                 id: "1".into(),
+                url: "https://example.com/1".into(),
             },
         )
         .expect("store_article failed");
@@ -54,6 +57,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
                 title: "second".into(),
                 content: "c2".into(),
                 id: "2".into(),
+                url: "https://example.com/2".into(),
             },
         )
         .expect("store_article failed");
@@ -62,6 +66,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
         title: "second".into(),
         content: "c2".into(),
         id: "2".into(),
+        url: "https://example.com/2".into(),
     };
     let latest = storage
         .get_latest_article("test")
@@ -85,6 +90,7 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
                 title: "unique".into(),
                 content: "body".into(),
                 id: "100".into(),
+                url: "https://example.com/unique".into(),
             },
         )
         .expect("store_article failed");
@@ -112,6 +118,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
                 title: title1.into(),
                 content: content1.into(),
                 id: id.into(),
+                url: "https://example.com/first".into(),
             },
         )
         .expect("store_article failed");
@@ -125,6 +132,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
                 title: title2.into(),
                 content: content2.into(),
                 id: id.into(),
+                url: "https://example.com/second".into(),
             },
         )
         .expect("store_article failed");
@@ -138,6 +146,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
         title: title2.into(),
         content: content2.into(),
         id: id.into(),
+        url: "https://example.com/second".into(),
     };
     assert_eq!(&articles[0], &expected);
 }
@@ -196,6 +205,7 @@ fn assert_invalid_feed_names<S: FeedStorage>(storage: S) {
                 title: "test".into(),
                 content: "test".into(),
                 id: "1".into(),
+                url: "https://example.com/test".into(),
             },
         );
         assert!(

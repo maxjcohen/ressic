@@ -51,12 +51,16 @@ Ressic is a minimal, self-hosted web service allowing clients to POST article da
 - `feeds_test/`: Directory to store test feed files (JSONL format)
 
 ### Test, Develop and Run
-- Develop using test driven approach
-- Always add or edit small features at a time, wait for test validation before moving to the next one.
+- Follow this development workflow for implementing new features:
+  1. Select a minimal feature to implement
+  2. Write extensive tests for the feature
+  3. Check that these tests fail with `cargo test`
+  4. Write a minimal implementation for the feature that makes the tests pass
+  5. Refactor the implementation if necessary, ensuring tests still pass
+  6. Update the documentation if needed (comments, README, copilot-instructions.md, etc.)
+  7. Commit the changes
 - When running `cargo` or `git` commands, do not use `cd` before, execute the
   command in the current working directory.
-- Build the project using exactly `cargo build`.
-- Test the project using exactly `cargo test`.
 
 
 ## Key Project Conventions

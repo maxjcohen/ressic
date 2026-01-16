@@ -10,6 +10,7 @@ fn main() {
             title: String::from("Title"),
             content: String::from("This is some content"),
             id: String::from("1"),
+            url: String::from("https://example.com/article/1"),
     };
     // Print it
     println!("Should work:\n {:?}", article);
