@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 /// A JSON-based local file storage implementation for RSS feed articles.
 ///
 /// This storage backend persists articles to the local filesystem using Json format.
-/// Each feed is stored in a separate file named `{feed_name}.json` within 
+/// Each feed is stored in a separate file named `{feed_name}.json` within
 /// the configured base directory.
 ///
 /// # Security
@@ -106,7 +106,7 @@ impl JsonLocalStorage {
         let f = match File::open(&feed_path) {
             Ok(file) => file,
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-                return Err(StorageError::FeedEmpty)
+                return Err(StorageError::FeedEmpty);
             }
             Err(e) => return Err(StorageError::Io(e)),
         };
@@ -151,11 +151,7 @@ impl FeedStorage for JsonLocalStorage {
         self.write_feed(feed_name, &feed)
     }
 
-    fn set_feed_metadata(
-        &self,
-        feed_name: &str,
-        feed: &Feed,
-    ) -> Result<(), StorageError> {
+    fn set_feed_metadata(&self, feed_name: &str, feed: &Feed) -> Result<(), StorageError> {
         // Attempt to read existing feed; if not found, start new feed
         let mut existing_feed = self.read_feed(feed_name).unwrap_or(Feed {
             name: feed_name.to_string(),

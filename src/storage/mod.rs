@@ -37,7 +37,7 @@ pub trait FeedStorage {
     ///
     /// Returns a `FeedEmpty` error if the feed contains no articles.
     fn get_feed(&self, feed_name: &str) -> Result<Feed, StorageError>;
-    
+
     /// Stores an article in the specified feed.
     ///
     /// If an article with the same URL already exists, it will be replaced.

@@ -6,7 +6,10 @@
 pub mod models;
 pub mod storage;
 
-use crate::{models::{Article}, storage::{FeedStorage, StorageError}};
+use crate::{
+    models::Article,
+    storage::{FeedStorage, StorageError},
+};
 
 /// Client for managing RSS feeds.
 ///

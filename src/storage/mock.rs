@@ -28,7 +28,7 @@ impl FeedStorage for MockStorage {
     fn store_article(&self, _feed_name: &str, _article: Article) -> Result<(), StorageError> {
         Ok(())
     }
-    
+
     fn set_feed_metadata(&self, _feed_name: &str, _feed: &Feed) -> Result<(), StorageError> {
         Ok(())
     }

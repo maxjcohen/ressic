@@ -1,5 +1,5 @@
-use std::fs;
 use ressic::storage::JsonLocalStorage;
+use std::fs;
 
 pub fn with_localfile_storage<F>(test_name: &str, test_fn: F)
 where
