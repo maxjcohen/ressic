@@ -1,6 +1,6 @@
 mod common;
 
-use chrono::Utc;
+use chrono::{TimeZone, Utc};
 use ressic::{
     models::Article,
     storage::{FeedStorage, StorageError},
@@ -12,7 +12,7 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
     let title = "Real title";
     let content = "Real content";
     let id = "42";
-    let pub_date = Utc::now();
+    let pub_date = Utc.with_ymd_and_hms(2024, 1, 15, 10, 30, 0).unwrap();
     storage
         .store_article(
             "test",
@@ -43,7 +43,7 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
 
 // After storing multiple articles, get_latest_article() should return the most recent one.
 fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
-    let pub_date1 = Utc::now();
+    let pub_date1 = Utc.with_ymd_and_hms(2024, 1, 15, 10, 0, 0).unwrap();
     storage
         .store_article(
             "test",
@@ -56,7 +56,7 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
             },
         )
         .expect("store_article failed");
-    let pub_date2 = Utc::now();
+    let pub_date2 = Utc.with_ymd_and_hms(2024, 1, 15, 11, 0, 0).unwrap();
     storage
         .store_article(
             "test",
@@ -100,7 +100,7 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
                 content: "body".into(),
                 id: "100".into(),
                 url: "https://example.com/unique".into(),
-                pub_date: Utc::now(),
+                pub_date: Utc.with_ymd_and_hms(2024, 2, 1, 12, 0, 0).unwrap(),
             },
         )
         .expect("store_article failed");
@@ -121,7 +121,7 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
 // but different IDs should result in only one article (the most recent).
 fn assert_deduplication<S: FeedStorage>(storage: S) {
     let url = "https://example.com/article";
-    let pub_date1 = Utc::now();
+    let pub_date1 = Utc.with_ymd_and_hms(2024, 3, 10, 8, 0, 0).unwrap();
     
     // Store first article with id "1"
     storage
@@ -137,7 +137,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
         )
         .expect("store_article failed");
 
-    let pub_date2 = Utc::now();
+    let pub_date2 = Utc.with_ymd_and_hms(2024, 3, 10, 9, 0, 0).unwrap();
     // Store second article with same URL but different id "2"
     storage
         .store_article(
@@ -225,7 +225,7 @@ fn assert_invalid_feed_names<S: FeedStorage>(storage: S) {
                 content: "test".into(),
                 id: "1".into(),
                 url: "https://example.com/test".into(),
-                pub_date: Utc::now(),
+                pub_date: Utc.with_ymd_and_hms(2024, 4, 1, 14, 0, 0).unwrap(),
             },
         );
         assert!(
