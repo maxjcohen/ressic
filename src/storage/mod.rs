@@ -1,4 +1,4 @@
-use crate::models::Article;
+use crate::models::{Article, Feed};
 
 pub mod local;
 pub mod mock;
@@ -35,19 +35,16 @@ impl From<serde_json::Error> for StorageError {
 pub trait FeedStorage {
     /// Retrieves all articles from the specified feed.
     ///
-    /// Returns an empty vector if the feed doesn't exist.
-    fn get_all_articles(&self, feed: &str) -> Result<Vec<Article>, StorageError>;
-    
-    /// Retrieves the most recently added article from the specified feed.
-    ///
-    /// Returns the article with the most recent pub_date.
-    /// Returns `StorageError::FeedEmpty` if the feed has no articles.
-    fn get_latest_article(&self, feed: &str) -> Result<Article, StorageError>;
+    /// Returns a `FeedEmpty` error if the feed contains no articles.
+    fn get_feed(&self, feed_name: &str) -> Result<Feed, StorageError>;
     
     /// Stores an article in the specified feed.
     ///
     /// If an article with the same URL already exists, it will be replaced.
-    fn store_article(&self, feed: &str, article: Article) -> Result<(), StorageError>;
+    fn store_article(&self, feed_name: &str, article: Article) -> Result<(), StorageError>;
+
+    /// Set feed metadata.
+    fn set_feed_metadata(&self, feed_name: &str, feed: &Feed) -> Result<(), StorageError>;
 }
 
 pub use local::JsonLocalStorage;

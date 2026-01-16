@@ -1,21 +1,14 @@
 use super::{FeedStorage, StorageError};
-use crate::models::Article;
+use crate::models::{Article, Feed};
 use std::fs::{File, OpenOptions};
-use std::io::{BufRead, BufReader, BufWriter, Write};
+use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
 
 /// A JSON-based local file storage implementation for RSS feed articles.
 ///
-/// This storage backend persists articles to the local filesystem using JSON Lines (JSONL) format,
-/// where each line in a file represents a single serialized article. Each feed is stored in a
-/// separate file named `{feed_name}.jsonl` within the configured base directory.
-///
-/// # File Format
-///
-/// Articles are stored in JSON Lines format (one JSON object per line), which allows for:
-/// - Efficient appending of new articles
-/// - Easy line-by-line parsing without loading entire files into memory
-/// - Simple recovery from partial writes
+/// This storage backend persists articles to the local filesystem using Json format.
+/// Each feed is stored in a separate file named `{feed_name}.json` within 
+/// the configured base directory.
 ///
 /// # Security
 ///
@@ -66,31 +59,31 @@ impl JsonLocalStorage {
     /// - Hidden files (.)
     /// - Control characters
     /// - Empty strings
-    fn validate_feed_name(feed: &str) -> Result<(), StorageError> {
-        if feed.is_empty() {
+    fn validate_feed_name(feed_name: &str) -> Result<(), StorageError> {
+        if feed_name.is_empty() {
             return Err(StorageError::InvalidFeedName(
                 "Feed name cannot be empty".to_string(),
             ));
         }
 
         // Reject if contains path separators or parent references
-        if feed.contains('/') || feed.contains('\\') || feed.contains("..") {
+        if feed_name.contains('/') || feed_name.contains('\\') || feed_name.contains("..") {
             return Err(StorageError::InvalidFeedName(format!(
                 "Feed name contains invalid path characters: {}",
-                feed
+                feed_name
             )));
         }
 
         // Reject if starts with dot (hidden files)
-        if feed.starts_with('.') {
+        if feed_name.starts_with('.') {
             return Err(StorageError::InvalidFeedName(format!(
                 "Feed name cannot start with '.': {}",
-                feed
+                feed_name
             )));
         }
 
         // Reject control characters and non-printable ASCII
-        if feed.chars().any(|c| c.is_control()) {
+        if feed_name.chars().any(|c| c.is_control()) {
             return Err(StorageError::InvalidFeedName(
                 "Feed name contains control characters".to_string(),
             ));
@@ -99,85 +92,81 @@ impl JsonLocalStorage {
         Ok(())
     }
 
-    fn feed_path(&self, feed: &str) -> Result<PathBuf, StorageError> {
-        Self::validate_feed_name(feed)?;
+    fn feed_path(&self, feed_name: &str) -> Result<PathBuf, StorageError> {
+        Self::validate_feed_name(feed_name)?;
         let mut p = self.base_dir.clone();
-        p.push(format!("{}.jsonl", feed));
+        p.push(format!("{}.json", feed_name));
         Ok(p)
     }
 
-    fn read_all(&self, feed: &str) -> Result<Vec<Article>, StorageError> {
-        let path = self.feed_path(feed)?;
-        if !path.exists() {
-            return Ok(vec![]);
-        }
-
-        let f = File::open(&path)?;
-        let reader = BufReader::new(f);
-        let mut out = Vec::new();
-        for line in reader.lines() {
-            let l = line?;
-            if l.trim().is_empty() {
-                continue;
+    fn read_feed(&self, feed_name: &str) -> Result<Feed, StorageError> {
+        // Validate feed name and construct path
+        let feed_path = self.feed_path(feed_name)?;
+        // Attempt to read feed, return FeedEmpty if not found
+        let f = match File::open(&feed_path) {
+            Ok(file) => file,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+                return Err(StorageError::FeedEmpty)
             }
-            let a: Article = serde_json::from_str(&l)?;
-            out.push(a);
-        }
-        Ok(out)
+            Err(e) => return Err(StorageError::Io(e)),
+        };
+        let reader = BufReader::new(f);
+        Ok(serde_json::from_reader(reader)?)
     }
 
-    fn write_all(&self, feed: &str, articles: &[Article]) -> Result<(), StorageError> {
-        let path = self.feed_path(feed)?;
-        let tmp_path = path.with_extension("jsonl.tmp");
-
-        if let Some(parent) = tmp_path.parent() {
-            if !parent.exists() {
-                std::fs::create_dir_all(parent)?;
-            }
-        }
-
-        let tmpf = OpenOptions::new()
-            .create(true)
+    fn write_feed(&self, feed_name: &str, feed: &Feed) -> Result<(), StorageError> {
+        let feed_path = self.feed_path(feed_name)?;
+        let f = OpenOptions::new()
             .write(true)
+            .create(true)
             .truncate(true)
-            .open(&tmp_path)?;
-        let mut writer = BufWriter::new(tmpf);
-        for a in articles {
-            let line = serde_json::to_string(a)?;
-            writer.write_all(line.as_bytes())?;
-            writer.write_all(b"\n")?;
-        }
-        writer.flush()?;
-
-        // Atomically replace
-        std::fs::rename(tmp_path, path)?;
+            .open(&feed_path)?;
+        let writer = BufWriter::new(f);
+        serde_json::to_writer_pretty(writer, feed)?;
         Ok(())
     }
 }
 
 impl FeedStorage for JsonLocalStorage {
-    fn get_all_articles(&self, feed: &str) -> Result<Vec<Article>, StorageError> {
-        let articles = self.read_all(feed)?;
-        // Return in insertion order
-        Ok(articles)
+    fn get_feed(&self, feed_name: &str) -> Result<Feed, StorageError> {
+        // Attempt to read existing feed; if not found, return FeedEmpty error
+        Ok(self.read_feed(feed_name)?)
     }
 
-    fn get_latest_article(&self, feed: &str) -> Result<Article, StorageError> {
-        let articles = self.read_all(feed)?;
-        articles
-            .into_iter()
-            .max_by_key(|a| a.pub_date)
-            .ok_or(StorageError::FeedEmpty)
-    }
-
-    fn store_article(&self, feed: &str, article: Article) -> Result<(), StorageError> {
+    fn store_article(&self, feed_name: &str, article: Article) -> Result<(), StorageError> {
         // Read existing, dedupe by url, update or append, then rewrite file
-        let mut articles = self.read_all(feed)?;
-        if let Some(a) = articles.iter_mut().find(|a| a.url == article.url) {
+        // Attempt to read existing feed; if not found, start new feed
+        let mut feed = self.read_feed(feed_name).unwrap_or(Feed {
+            name: feed_name.to_string(),
+            title: feed_name.to_string(),
+            link: "".to_string(),
+            description: format!("Default description for {}", feed_name),
+            articles: vec![],
+        });
+        if let Some(a) = feed.articles.iter_mut().find(|a| a.url == article.url) {
             *a = article;
         } else {
-            articles.push(article);
+            feed.articles.push(article);
         }
-        self.write_all(feed, &articles)
+        self.write_feed(feed_name, &feed)
+    }
+
+    fn set_feed_metadata(
+        &self,
+        feed_name: &str,
+        feed: &Feed,
+    ) -> Result<(), StorageError> {
+        // Attempt to read existing feed; if not found, start new feed
+        let mut existing_feed = self.read_feed(feed_name).unwrap_or(Feed {
+            name: feed_name.to_string(),
+            title: "".to_string(),
+            link: "".to_string(),
+            description: "".to_string(),
+            articles: vec![],
+        });
+        existing_feed.title = feed.title.clone();
+        existing_feed.link = feed.link.clone();
+        existing_feed.description = feed.description.clone();
+        self.write_feed(feed_name, &existing_feed)
     }
 }

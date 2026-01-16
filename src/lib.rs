@@ -6,7 +6,7 @@
 pub mod models;
 pub mod storage;
 
-use crate::{models::Article, storage::{FeedStorage, StorageError}};
+use crate::{models::{Article}, storage::{FeedStorage, StorageError}};
 
 /// Client for managing RSS feeds.
 ///
@@ -39,21 +39,8 @@ impl<S: FeedStorage> Client<S> {
     /// # Errors
     ///
     /// Returns a `StorageError` if the article cannot be stored.
-    pub fn store_article(&mut self, feed: &str, article: Article) -> Result<(), StorageError> {
-        self.storage.store_article(feed, article)
-    }
-
-    /// Retrieves all articles from the specified feed.
-    ///
-    /// # Arguments
-    ///
-    /// * `feed` - The name of the feed to retrieve articles from
-    ///
-    /// # Errors
-    ///
-    /// Returns a `StorageError` if articles cannot be retrieved.
-    pub fn get_articles(&self, feed: &str) -> Result<Vec<Article>, StorageError> {
-        self.storage.get_all_articles(feed)
+    pub fn store_article(&mut self, feed_name: &str, article: Article) -> Result<(), StorageError> {
+        self.storage.store_article(feed_name, article)
     }
 
     /// Generates an RSS feed (not yet implemented).

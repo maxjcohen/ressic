@@ -1,13 +1,13 @@
 mod common;
 
+use crate::common::with_localfile_storage;
 use chrono::{TimeZone, Utc};
 use ressic::{
     models::Article,
     storage::{FeedStorage, StorageError},
 };
-use crate::common::with_localfile_storage;
 
-// After storing an article, storage.get_all_articles() should return it.
+// After storing an article, storage.get_feed() should return it.
 fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
     let title = "Real title";
     let content = "Real content";
@@ -27,11 +27,13 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
         )
         .expect("store_article failed");
 
-    let articles = storage
-        .get_all_articles("test")
-        .expect("get_all_articles failed");
+    let feed = storage.get_feed("test").expect("get_feed failed");
     // Expect the stored article to be present.
-    assert_eq!(articles.len(), 1, "expected exactly one stored article");
+    assert_eq!(
+        feed.articles.len(),
+        1,
+        "expected exactly one stored article"
+    );
     let expected = Article {
         title: title.into(),
         content: content.into(),
@@ -40,81 +42,27 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
         summary: "Test summary".into(),
         pub_date,
     };
-    assert_eq!(&articles[0], &expected);
+    assert_eq!(&feed.articles[0], &expected);
 }
 
-// After storing multiple articles, get_latest_article() should return the most recent one
-// by pub_date, not by insertion order.
-fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
-    // Store articles out of chronological order to ensure pub_date is used, not insertion order
-    let pub_date1 = Utc.with_ymd_and_hms(2024, 1, 15, 10, 0, 0).unwrap();
-    let pub_date2 = Utc.with_ymd_and_hms(2024, 1, 15, 11, 0, 0).unwrap();
-    let pub_date3 = Utc.with_ymd_and_hms(2024, 1, 15, 9, 0, 0).unwrap();
-    
-    // Store second oldest first
-    storage
-        .store_article(
-            "test",
-            Article {
-                title: "first".into(),
-                content: "c1".into(),
-                id: "1".into(),
-                url: "https://example.com/1".into(),
-                summary: "summary1".into(),
-                pub_date: pub_date1,
-            },
-        )
-        .expect("store_article failed");
-    
-    // Store newest second (should be returned by get_latest_article)
-    storage
-        .store_article(
-            "test",
-            Article {
-                title: "second".into(),
-                content: "c2".into(),
-                id: "2".into(),
-                url: "https://example.com/2".into(),
-                summary: "summary2".into(),
-                pub_date: pub_date2,
-            },
-        )
-        .expect("store_article failed");
-    
-    // Store oldest last (to verify insertion order doesn't matter)
-    storage
-        .store_article(
-            "test",
-            Article {
-                title: "third".into(),
-                content: "c3".into(),
-                id: "3".into(),
-                url: "https://example.com/3".into(),
-                summary: "summary3".into(),
-                pub_date: pub_date3,
-            },
-        )
-        .expect("store_article failed");
-
-    // Should return the article with the latest pub_date (second), not last inserted (third)
-    let expected = Article {
-        title: "second".into(),
-        content: "c2".into(),
-        id: "2".into(),
-        url: "https://example.com/2".into(),
-        summary: "summary2".into(),
-        pub_date: pub_date2,
-    };
-    let latest = storage
-        .get_latest_article("test")
-        .expect("get_latest_article failed");
-    assert_eq!(latest, expected);
+#[test]
+fn localfile_store_then_get_all() {
+    with_localfile_storage("store_then_get_all", |storage| {
+        assert_store_then_get_all(storage);
+    });
 }
 
 // Test that get_latest_article returns FeedEmpty error for empty feeds.
 fn assert_empty_feed_error<S: FeedStorage>(storage: S) {
-    let result = storage.get_latest_article("empty_feed");
+    let result = storage.get_feed("empty_feed");
     assert!(matches!(result, Err(StorageError::FeedEmpty)));
+}
+
+#[test]
+fn localfile_empty_feed_error() {
+    with_localfile_storage("empty_feed_error", |storage| {
+        assert_empty_feed_error(storage);
+    });
 }
 
 // When storing an article in one feed, another feed should remain empty.
@@ -134,15 +82,20 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
         )
         .expect("store_article failed");
 
-    // Read from a different feed; expect no articles.
-    let articles = storage
-        .get_all_articles("feed_two")
-        .expect("get_all_articles failed");
-    assert_eq!(
-        articles.len(),
-        0,
-        "expected no articles in a different feed"
-    );
+    // Read from a different feed; expect FeedEmpty error
+    let result = storage.get_feed("feed_two");
+    assert!(matches!(result, Err(StorageError::FeedEmpty)));
+    // Also verify that feed_one has the article
+    let feed_one = storage.get_feed("feed_one").expect("get_feed failed");
+    assert_eq!(feed_one.articles.len(), 1);
+    assert_eq!(feed_one.articles[0].title, "unique");
+}
+
+#[test]
+fn localfile_isolated_between_feeds() {
+    with_localfile_storage("isolated_between_feeds", |storage| {
+        assert_isolated_between_feeds(storage);
+    });
 }
 
 // Test deduplication when storing an article with the same URL.
@@ -151,7 +104,7 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
 fn assert_deduplication<S: FeedStorage>(storage: S) {
     let url = "https://example.com/article";
     let pub_date1 = Utc.with_ymd_and_hms(2024, 3, 10, 8, 0, 0).unwrap();
-    
+
     // Store first article with id "1"
     storage
         .store_article(
@@ -183,13 +136,15 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
         )
         .expect("store_article failed");
 
-    let articles = storage
-        .get_all_articles("test")
-        .expect("get_all_articles failed");
-    
+    let feed = storage.get_feed("test").expect("get_feed failed");
+
     // Expect only one article because they have the same URL
-    assert_eq!(articles.len(), 1, "expected exactly one article after deduplication by URL");
-    
+    assert_eq!(
+        feed.articles.len(),
+        1,
+        "expected exactly one article after deduplication by URL"
+    );
+
     // The second article should have replaced the first
     let expected = Article {
         title: "Second title".into(),
@@ -199,35 +154,7 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
         summary: "Second summary".into(),
         pub_date: pub_date2,
     };
-    assert_eq!(&articles[0], &expected);
-}
-
-#[test]
-fn localfile_store_then_get_all() {
-    with_localfile_storage("store_then_get_all", |storage| {
-        assert_store_then_get_all(storage);
-    });
-}
-
-#[test]
-fn localfile_latest_most_recent() {
-    with_localfile_storage("latest_most_recent", |storage| {
-        assert_latest_is_most_recent(storage);
-    });
-}
-
-#[test]
-fn localfile_empty_feed_error() {
-    with_localfile_storage("empty_feed_error", |storage| {
-        assert_empty_feed_error(storage);
-    });
-}
-
-#[test]
-fn localfile_isolated_between_feeds() {
-    with_localfile_storage("isolated_between_feeds", |storage| {
-        assert_isolated_between_feeds(storage);
-    });
+    assert_eq!(&feed.articles[0], &expected);
 }
 
 #[test]

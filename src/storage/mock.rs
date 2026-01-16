@@ -1,5 +1,5 @@
 use super::{FeedStorage, StorageError};
-use crate::models::Article;
+use crate::models::{Article, Feed};
 
 /// Mock storage implementation for testing.
 ///
@@ -15,15 +15,21 @@ impl MockStorage {
 }
 
 impl FeedStorage for MockStorage {
-    fn get_all_articles(&self, _feed: &str) -> Result<Vec<Article>, StorageError> {
-        Ok(vec![])
+    fn get_feed(&self, feed_name: &str) -> Result<Feed, StorageError> {
+        Ok(Feed {
+            name: feed_name.into(),
+            title: "".into(),
+            link: "".into(),
+            description: "".into(),
+            articles: vec![],
+        })
     }
 
-    fn get_latest_article(&self, _feed: &str) -> Result<Article, StorageError> {
-        Err(StorageError::FeedEmpty)
+    fn store_article(&self, _feed_name: &str, _article: Article) -> Result<(), StorageError> {
+        Ok(())
     }
-
-    fn store_article(&self, _feed: &str, _article: Article) -> Result<(), StorageError> {
+    
+    fn set_feed_metadata(&self, _feed_name: &str, _feed: &Feed) -> Result<(), StorageError> {
         Ok(())
     }
 }
