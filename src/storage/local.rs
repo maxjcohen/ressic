@@ -141,7 +141,7 @@ impl FeedStorage for JsonLocalStorage {
         let articles = self.read_all(feed)?;
         articles
             .into_iter()
-            .last()
+            .max_by_key(|a| a.pub_date)
             .ok_or(StorageError::FeedEmpty)
     }
 

@@ -41,9 +41,15 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
     assert_eq!(&articles[0], &expected);
 }
 
-// After storing multiple articles, get_latest_article() should return the most recent one.
+// After storing multiple articles, get_latest_article() should return the most recent one
+// by pub_date, not by insertion order.
 fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
+    // Store articles out of chronological order to ensure pub_date is used, not insertion order
     let pub_date1 = Utc.with_ymd_and_hms(2024, 1, 15, 10, 0, 0).unwrap();
+    let pub_date2 = Utc.with_ymd_and_hms(2024, 1, 15, 11, 0, 0).unwrap();
+    let pub_date3 = Utc.with_ymd_and_hms(2024, 1, 15, 9, 0, 0).unwrap();
+    
+    // Store second oldest first
     storage
         .store_article(
             "test",
@@ -56,7 +62,8 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
             },
         )
         .expect("store_article failed");
-    let pub_date2 = Utc.with_ymd_and_hms(2024, 1, 15, 11, 0, 0).unwrap();
+    
+    // Store newest second (should be returned by get_latest_article)
     storage
         .store_article(
             "test",
@@ -69,7 +76,22 @@ fn assert_latest_is_most_recent<S: FeedStorage>(storage: S) {
             },
         )
         .expect("store_article failed");
+    
+    // Store oldest last (to verify insertion order doesn't matter)
+    storage
+        .store_article(
+            "test",
+            Article {
+                title: "third".into(),
+                content: "c3".into(),
+                id: "3".into(),
+                url: "https://example.com/3".into(),
+                pub_date: pub_date3,
+            },
+        )
+        .expect("store_article failed");
 
+    // Should return the article with the latest pub_date (second), not last inserted (third)
     let expected = Article {
         title: "second".into(),
         content: "c2".into(),

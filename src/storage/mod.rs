@@ -40,6 +40,7 @@ pub trait FeedStorage {
     
     /// Retrieves the most recently added article from the specified feed.
     ///
+    /// Returns the article with the most recent pub_date.
     /// Returns `StorageError::FeedEmpty` if the feed has no articles.
     fn get_latest_article(&self, feed: &str) -> Result<Article, StorageError>;
     
