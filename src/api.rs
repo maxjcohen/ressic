@@ -156,6 +156,12 @@ impl From<String> for ApiError {
     }
 }
 
+impl From<crate::models::ValidationError> for ApiError {
+    fn from(err: crate::models::ValidationError) -> Self {
+        ApiError::BadRequest(err.to_string())
+    }
+}
+
 impl From<crate::storage::StorageError> for ApiError {
     fn from(err: crate::storage::StorageError) -> Self {
         use crate::storage::StorageError;

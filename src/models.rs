@@ -1,3 +1,27 @@
+/// Validation errors that can occur when constructing models.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ValidationError {
+    /// A required field is empty or contains only whitespace
+    EmptyField { field: String },
+    /// Feed name contains invalid characters or patterns
+    InvalidFeedName { name: String, reason: String },
+}
+
+impl std::fmt::Display for ValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ValidationError::EmptyField { field } => {
+                write!(f, "Field '{}' cannot be empty", field)
+            }
+            ValidationError::InvalidFeedName { name, reason } => {
+                write!(f, "Invalid feed name '{}': {}", name, reason)
+            }
+        }
+    }
+}
+
+impl std::error::Error for ValidationError {}
+
 /// Represents an article in an RSS feed.
 ///
 /// An article contains the essential information needed for RSS feed generation:
