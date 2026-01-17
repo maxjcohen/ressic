@@ -37,6 +37,10 @@ impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {
         }
     }
 
+    pub fn list_feeds(&self) -> Result<Vec<String>, StorageError> {
+        self.storage.list_feeds()
+    }
+
     /// Stores an article in the specified feed.
     ///
     /// If an article with the same ID already exists, it will be replaced.
