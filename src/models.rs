@@ -142,6 +142,16 @@ impl Article {
 /// Contains channel-level information required for RSS 2.0 feed generation,
 /// including both required fields (title, link, description) and optional fields
 /// for enhanced feed metadata.
+///
+/// # Validation
+///
+/// Feeds cannot be constructed directly. Use `Feed::new()` which validates:
+/// - `name` must not be empty and contain only alphanumeric characters, hyphens, and underscores
+/// - `name` must not contain path separators (`/`, `\`) or `..`
+/// - `title` must not be empty (after trimming whitespace)
+/// - `link` must not be empty (after trimming whitespace)
+/// - `description` must not be empty (after trimming whitespace)
+/// - `articles` can be any Vec<Article> (including empty)
 #[derive(Debug, PartialEq, Eq, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Feed {
     /// The name identifier for the feed (used internally).
@@ -154,4 +164,107 @@ pub struct Feed {
     pub description: String,
     /// A list of articles contained in the feed.
     pub articles: Vec<Article>,
+}
+
+impl Feed {
+    /// Creates a new Feed with validation.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - Internal feed identifier (alphanumeric, hyphens, underscores only)
+    /// * `title` - Feed title (must not be empty after trimming)
+    /// * `link` - Feed website URL (must not be empty after trimming)
+    /// * `description` - Feed description (must not be empty after trimming)
+    /// * `articles` - List of articles (can be empty)
+    ///
+    /// # Errors
+    ///
+    /// Returns `ValidationError::InvalidFeedName` if the name contains invalid characters
+    /// or patterns. Returns `ValidationError::EmptyField` if any required field is empty
+    /// or contains only whitespace.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use ressic::models::Feed;
+    ///
+    /// let feed = Feed::new(
+    ///     "my-feed".to_string(),
+    ///     "My Feed Title".to_string(),
+    ///     "https://example.com".to_string(),
+    ///     "A description of my feed".to_string(),
+    ///     vec![],
+    /// ).expect("Valid feed");
+    /// ```
+    pub fn new(
+        name: String,
+        title: String,
+        link: String,
+        description: String,
+        articles: Vec<Article>,
+    ) -> Result<Self, ValidationError> {
+        // Validate and trim name
+        let name = name.trim().to_string();
+
+        // Check if name is empty
+        if name.is_empty() {
+            return Err(ValidationError::InvalidFeedName {
+                name: name.clone(),
+                reason: "Feed name cannot be empty".to_string(),
+            });
+        }
+
+        // Check for path traversal patterns
+        if name.contains("..") || name.contains('/') || name.contains('\\') {
+            return Err(ValidationError::InvalidFeedName {
+                name: name.clone(),
+                reason: "Feed name contains invalid path characters".to_string(),
+            });
+        }
+
+        // Check for valid characters (alphanumeric, hyphens, underscores only)
+        if !name
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+        {
+            return Err(ValidationError::InvalidFeedName {
+                name: name.clone(),
+                reason:
+                    "Feed name must contain only alphanumeric characters, hyphens, and underscores"
+                        .to_string(),
+            });
+        }
+
+        // Validate title
+        let title = title.trim().to_string();
+        if title.is_empty() {
+            return Err(ValidationError::EmptyField {
+                field: "title".to_string(),
+            });
+        }
+
+        // Validate link
+        let link = link.trim().to_string();
+        if link.is_empty() {
+            return Err(ValidationError::EmptyField {
+                field: "link".to_string(),
+            });
+        }
+
+        // Validate description
+        let description = description.trim().to_string();
+        if description.is_empty() {
+            return Err(ValidationError::EmptyField {
+                field: "description".to_string(),
+            });
+        }
+
+        Ok(Feed {
+            name,
+            title,
+            link,
+            description,
+            articles,
+        })
+    }
 }
