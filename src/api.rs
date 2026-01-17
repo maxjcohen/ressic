@@ -46,61 +46,41 @@ fn validate_feed_name(name: &str) -> Result<(), String> {
 pub async fn post_feed<S: FeedStorage, G: FeedGenerator>(
     Path(feed_name): Path<String>,
     State(client): State<SharedClient<S, G>>,
-    Json(feed): Json<Feed>,
+    Json(raw_feed): Json<Feed>,
 ) -> Result<StatusCode, ApiError> {
-    // Validate feed name
-    validate_feed_name(&feed_name)?;
-
-    // Validate feed metadata
-    if feed.title.trim().is_empty() {
-        return Err(ApiError::BadRequest(
-            "Feed title cannot be empty".to_string(),
-        ));
+    // Validate articles - construct validated Article instances
+    let mut validated_articles = Vec::new();
+    for raw_article in raw_feed.articles {
+        let article = crate::models::Article::new(
+            raw_article.title,
+            raw_article.content,
+            raw_article.id,
+            raw_article.url,
+            raw_article.summary,
+            raw_article.pub_date,
+        )?;
+        validated_articles.push(article);
     }
 
-    if feed.link.trim().is_empty() {
-        return Err(ApiError::BadRequest(
-            "Feed link cannot be empty".to_string(),
-        ));
-    }
-
-    if feed.description.trim().is_empty() {
-        return Err(ApiError::BadRequest(
-            "Feed description cannot be empty".to_string(),
-        ));
-    }
-
-    // Validate articles
-    for article in &feed.articles {
-        if article.title.trim().is_empty() {
-            return Err(ApiError::BadRequest(
-                "Article title cannot be empty".to_string(),
-            ));
-        }
-        if article.content.trim().is_empty() {
-            return Err(ApiError::BadRequest(
-                "Article content cannot be empty".to_string(),
-            ));
-        }
-        if article.id.trim().is_empty() {
-            return Err(ApiError::BadRequest(
-                "Article id cannot be empty".to_string(),
-            ));
-        }
-        if article.url.trim().is_empty() {
-            return Err(ApiError::BadRequest(
-                "Article url cannot be empty".to_string(),
-            ));
-        }
-    }
+    // Validate feed metadata and construct validated Feed
+    // Note: feed_name from path must match or we use the path parameter
+    let validated_feed = crate::models::Feed::new(
+        feed_name.clone(),
+        raw_feed.title,
+        raw_feed.link,
+        raw_feed.description,
+        validated_articles,
+    )?;
 
     let client = client.lock().unwrap();
 
     // Set feed metadata
-    client.storage.set_feed_metadata(&feed_name, &feed)?;
+    client
+        .storage
+        .set_feed_metadata(&feed_name, &validated_feed)?;
 
     // Store each article
-    for article in &feed.articles {
+    for article in &validated_feed.articles {
         client.storage.store_article(&feed_name, article.clone())?;
         println!("Added article '{}' to feed '{}'", article.title, feed_name);
     }
