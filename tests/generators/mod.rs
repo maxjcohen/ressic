@@ -1,16 +1,11 @@
 use chrono::{TimeZone, Utc};
-use ressic::generator::{FeedGenerator, PlainText, Rss20};
+use ressic::generator::FeedGenerator;
 use ressic::models::{Article, Feed};
 
-#[test]
-fn test_generator() {
-    fn test_generate<G: FeedGenerator>(
-        generator: &G,
-        feed: &Feed,
-    ) -> Result<String, ressic::generator::GeneratorError> {
-        generator.generate(feed)
-    }
+mod plain_text_tests;
+mod rss20_tests;
 
+pub fn test_generate<G: FeedGenerator>(generator: &G) {
     let feed = Feed {
         name: "Test Feed".into(),
         title: "Test Feed Title".into(),
@@ -36,6 +31,5 @@ fn test_generator() {
         ],
     };
 
-    assert!(test_generate(&PlainText::new(), &feed).is_ok());
-    assert!(test_generate(&Rss20::new(), &feed).is_ok());
+    assert!(generator.generate(&feed).is_ok());
 }
