@@ -3,6 +3,7 @@
 //! This library provides a simple client interface for managing RSS feeds,
 //! with pluggable storage backends and feed format generators.
 
+pub mod api;
 pub mod generator;
 pub mod models;
 pub mod storage;
@@ -12,6 +13,8 @@ use crate::{
     models::Article,
     storage::{FeedStorage, StorageError},
 };
+use axum::{Router, routing::get, routing::post};
+use std::sync::{Arc, Mutex};
 
 /// Client for managing RSS feeds.
 ///
@@ -62,4 +65,19 @@ impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {
         self.generator
             .generate(&self.storage.get_feed(feed_name).unwrap())
     }
+}
+
+/// Creates the Axum router for the API server
+///
+/// # Arguments
+///
+/// * `client` - The shared client instance to use for all requests
+pub fn create_app<S: FeedStorage + Send + 'static, G: FeedGenerator + Send + 'static>(
+    client: Arc<Mutex<Client<S, G>>>,
+) -> Router {
+    Router::new()
+        .route("/v1/feed/:feed_name", post(api::post_feed::<S, G>))
+        .route("/v1/feed/", get(api::list_feeds::<S, G>))
+        .route("/v1/rss/:feed_name", get(api::get_rss::<S, G>))
+        .with_state(client)
 }

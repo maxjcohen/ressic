@@ -1,56 +1,28 @@
-use chrono::Utc;
-use ressic::{
-    Client,
-    generator::{FeedGenerator, PlainText},
-    models::{Article, Feed},
-    storage::{FeedStorage, JsonLocalStorage},
-};
+use ressic::{Client, create_app, generator::Rss20, storage::JsonLocalStorage};
+use std::sync::{Arc, Mutex};
 
-fn main() {
-    // Load storage and generator
-    let storage = JsonLocalStorage::new("./feeds").unwrap();
-    let generator = PlainText::new();
-    // Load client
-    let mut client = Client::new(storage, generator);
-    // Load new feed
-    let feed = Feed {
-        name: String::from("default"),
-        title: String::from("Default Feed"),
-        link: String::from("https://example.com"),
-        description: String::from("This is the default feed"),
-        articles: vec![Article {
-            title: String::from("Title"),
-            content: String::from("This is some content"),
-            id: String::from("1"),
-            url: String::from("https://example.com/article/1"),
-            summary: String::from("A brief summary"),
-            pub_date: Utc::now(),
-        }],
-    };
-    // Print it
-    println!("Should work:\n {:?}", feed);
-    // Store it
-    client
-        .store_article("default", feed.articles[0].clone())
-        .unwrap();
-    client.storage.set_feed_metadata("default", &feed).unwrap();
-    // Define a new article
-    let new_article = Article {
-        title: String::from("Another Title"),
-        content: String::from("This is some more content"),
-        id: String::from("2"),
-        url: String::from("https://example.com/article/2"),
-        summary: String::from("Another brief summary"),
-        pub_date: Utc::now(),
-    };
-    // Store the new article
-    client.store_article("default", new_article).unwrap();
-    // Generate a feed content from this feed
-    print!(
-        "{}",
-        client
-            .generator
-            .generate(&client.storage.get_feed("default").unwrap())
-            .unwrap()
-    );
+#[tokio::main]
+async fn main() {
+    // Initialize storage and generator
+    let storage = JsonLocalStorage::new("feeds").expect("Failed to initialize storage");
+    let generator = Rss20;
+
+    // Create the client
+    let client = Client::new(storage, generator);
+    let shared_client = Arc::new(Mutex::new(client));
+
+    // Create the Axum router
+    let app = create_app(shared_client);
+
+    // Bind to localhost:3000
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .expect("Failed to bind to address");
+
+    println!("Ressic server listening on http://127.0.0.1:3000");
+
+    // Start the server
+    axum::serve(listener, app)
+        .await
+        .expect("Server failed to start");
 }
