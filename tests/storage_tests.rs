@@ -202,3 +202,66 @@ fn localfile_rejects_invalid_feed_names() {
         assert_invalid_feed_names(storage);
     });
 }
+
+// Test that list_feeds returns all feed names
+fn assert_list_feeds<S: FeedStorage>(storage: S) {
+    // Initially, there should be no feeds
+    let feeds = storage.list_feeds().expect("list_feeds failed");
+    assert_eq!(feeds.len(), 0, "expected no feeds initially");
+
+    // Store articles in multiple feeds
+    storage
+        .store_article(
+            "feed_a",
+            Article {
+                title: "Article A".into(),
+                content: "Content A".into(),
+                id: "a1".into(),
+                url: "https://example.com/a".into(),
+                summary: "Summary A".into(),
+                pub_date: Utc.with_ymd_and_hms(2024, 5, 1, 10, 0, 0).unwrap(),
+            },
+        )
+        .expect("store_article failed");
+
+    storage
+        .store_article(
+            "feed_b",
+            Article {
+                title: "Article B".into(),
+                content: "Content B".into(),
+                id: "b1".into(),
+                url: "https://example.com/b".into(),
+                summary: "Summary B".into(),
+                pub_date: Utc.with_ymd_and_hms(2024, 5, 2, 11, 0, 0).unwrap(),
+            },
+        )
+        .expect("store_article failed");
+
+    storage
+        .store_article(
+            "feed_c",
+            Article {
+                title: "Article C".into(),
+                content: "Content C".into(),
+                id: "c1".into(),
+                url: "https://example.com/c".into(),
+                summary: "Summary C".into(),
+                pub_date: Utc.with_ymd_and_hms(2024, 5, 3, 12, 0, 0).unwrap(),
+            },
+        )
+        .expect("store_article failed");
+
+    // List feeds and verify all three are present
+    let mut feeds = storage.list_feeds().expect("list_feeds failed");
+    feeds.sort(); // Sort for consistent comparison
+    assert_eq!(feeds.len(), 3, "expected exactly three feeds");
+    assert_eq!(feeds, vec!["feed_a", "feed_b", "feed_c"]);
+}
+
+#[test]
+fn localfile_list_feeds() {
+    with_localfile_storage("list_feeds", |storage| {
+        assert_list_feeds(storage);
+    });
+}

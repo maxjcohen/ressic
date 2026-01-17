@@ -99,6 +99,26 @@ impl JsonLocalStorage {
         Ok(p)
     }
 
+    fn list_stored_feeds(&self) -> Result<Vec<String>, StorageError> {
+        let mut feeds = Vec::new();
+        for entry in std::fs::read_dir(&self.base_dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_file() {
+                if let Some(ext) = path.extension() {
+                    if ext == "json" {
+                        if let Some(stem) = path.file_stem() {
+                            if let Some(feed_name) = stem.to_str() {
+                                feeds.push(feed_name.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Ok(feeds)
+    }
+
     fn read_feed(&self, feed_name: &str) -> Result<Feed, StorageError> {
         // Validate feed name and construct path
         let feed_path = self.feed_path(feed_name)?;
@@ -131,6 +151,10 @@ impl FeedStorage for JsonLocalStorage {
     fn get_feed(&self, feed_name: &str) -> Result<Feed, StorageError> {
         // Attempt to read existing feed; if not found, return FeedEmpty error
         Ok(self.read_feed(feed_name)?)
+    }
+
+    fn list_feeds(&self) -> Result<Vec<String>, StorageError> {
+        self.list_stored_feeds()
     }
 
     fn store_article(&self, feed_name: &str, article: Article) -> Result<(), StorageError> {

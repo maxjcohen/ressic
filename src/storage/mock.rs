@@ -25,6 +25,10 @@ impl FeedStorage for MockStorage {
         })
     }
 
+    fn list_feeds(&self) -> Result<Vec<String>, StorageError> {
+        Ok(vec![])
+    }
+
     fn store_article(&self, _feed_name: &str, _article: Article) -> Result<(), StorageError> {
         Ok(())
     }
