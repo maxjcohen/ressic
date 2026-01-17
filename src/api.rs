@@ -10,34 +10,6 @@ use std::sync::{Arc, Mutex};
 /// Shared state type for the API server
 pub type SharedClient<S, G> = Arc<Mutex<Client<S, G>>>;
 
-/// Validates a feed name to prevent path traversal attacks and ensure safe filenames
-///
-/// Valid feed names must:
-/// - Be non-empty
-/// - Only contain alphanumeric characters, hyphens, and underscores
-/// - Not contain path separators or special characters
-fn validate_feed_name(name: &str) -> Result<(), String> {
-    if name.is_empty() {
-        return Err("Feed name cannot be empty".to_string());
-    }
-
-    if name.contains("..") || name.contains('/') || name.contains('\\') {
-        return Err("Feed name contains invalid path characters".to_string());
-    }
-
-    if !name
-        .chars()
-        .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
-    {
-        return Err(
-            "Feed name must contain only alphanumeric characters, hyphens, and underscores"
-                .to_string(),
-        );
-    }
-
-    Ok(())
-}
-
 /// POST /v1/feeds/:feed_name
 ///
 /// Adds articles to a feed. The request body should contain a Feed object with
@@ -107,12 +79,9 @@ pub async fn get_rss<S: FeedStorage, G: FeedGenerator>(
     Path(feed_name): Path<String>,
     State(client): State<SharedClient<S, G>>,
 ) -> Result<Response, ApiError> {
-    // Validate feed name
-    validate_feed_name(&feed_name)?;
-
     let client = client.lock().unwrap();
 
-    // Get the feed
+    // Get the feed - storage layer will validate feed name
     let feed = client.storage.get_feed(&feed_name)?;
 
     // Generate RSS
@@ -182,27 +151,5 @@ impl IntoResponse for ApiError {
         };
 
         (status, message).into_response()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_validate_feed_name() {
-        // Valid names
-        assert!(validate_feed_name("myFeed").is_ok());
-        assert!(validate_feed_name("my-feed").is_ok());
-        assert!(validate_feed_name("my_feed").is_ok());
-        assert!(validate_feed_name("feed123").is_ok());
-
-        // Invalid names
-        assert!(validate_feed_name("").is_err());
-        assert!(validate_feed_name("my/feed").is_err());
-        assert!(validate_feed_name("my\\feed").is_err());
-        assert!(validate_feed_name("../feed").is_err());
-        assert!(validate_feed_name("my feed").is_err());
-        assert!(validate_feed_name("my@feed").is_err());
     }
 }

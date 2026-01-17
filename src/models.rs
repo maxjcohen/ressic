@@ -1,3 +1,57 @@
+//! Core data models for Ressic RSS feed management.
+//!
+//! This module provides the fundamental data structures for representing RSS feeds
+//! and articles, with validation built into constructors to ensure data integrity.
+//!
+//! # Validation Approach
+//!
+//! All models in this module use constructor-based validation. Struct literals
+//! should not be used directly in production code - instead, use the `new()`
+//! constructors which enforce validation rules:
+//!
+//! - **Article::new()**: Validates that title, content, id, and url are non-empty
+//! - **Feed::new()**: Validates feed name format and that title, link, and description
+//!   are non-empty
+//!
+//! # Example
+//!
+//! ```
+//! use ressic::models::{Article, Feed};
+//! use chrono::Utc;
+//!
+//! // Create a validated article
+//! let article = Article::new(
+//!     "Article Title".to_string(),
+//!     "Article content".to_string(),
+//!     "unique-id".to_string(),
+//!     "https://example.com/article".to_string(),
+//!     "Brief summary".to_string(),
+//!     Utc::now(),
+//! ).expect("valid article");
+//!
+//! // Create a validated feed
+//! let feed = Feed::new(
+//!     "my-feed".to_string(),
+//!     "My Feed".to_string(),
+//!     "https://example.com".to_string(),
+//!     "Feed description".to_string(),
+//!     vec![article],
+//! ).expect("valid feed");
+//! ```
+//!
+//! # Internal Storage
+//!
+//! The storage layer uses serde deserialization which bypasses validation. This is
+//! acceptable because:
+//! - Storage is an internal layer that only reads data it previously wrote
+//! - All data entering storage has already been validated at the API boundary
+//! - This keeps the storage layer simple and performant
+//!
+//! # Error Handling
+//!
+//! Validation errors are returned as `Result<T, ValidationError>` from constructors.
+//! The API layer automatically converts `ValidationError` to HTTP 400 Bad Request responses.
+
 /// Validation errors that can occur when constructing models.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ValidationError {
