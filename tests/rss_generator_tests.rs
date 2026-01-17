@@ -5,13 +5,14 @@ use ressic::models::{Article, Feed};
 #[test]
 fn test_rss_basic_structure() {
     let generator = ressic::generator::Rss20::new();
-    let feed = Feed {
-        name: "test".into(),
-        title: "Test Feed".into(),
-        link: "https://example.com".into(),
-        description: "A test feed".into(),
-        articles: vec![],
-    };
+    let feed = Feed::new(
+        "test".into(),
+        "Test Feed".into(),
+        "https://example.com".into(),
+        "A test feed".into(),
+        vec![],
+    )
+    .unwrap();
 
     let output = generator.generate(&feed).expect("Failed to generate RSS");
 
@@ -30,13 +31,14 @@ fn test_rss_basic_structure() {
 #[test]
 fn test_rss_channel_metadata() {
     let generator = ressic::generator::Rss20::new();
-    let feed = Feed {
-        name: "news".into(),
-        title: "News Feed".into(),
-        link: "https://news.example.com".into(),
-        description: "Latest news and updates".into(),
-        articles: vec![],
-    };
+    let feed = Feed::new(
+        "news".into(),
+        "News Feed".into(),
+        "https://news.example.com".into(),
+        "Latest news and updates".into(),
+        vec![],
+    )
+    .unwrap();
 
     let output = generator.generate(&feed).expect("Failed to generate RSS");
 
@@ -49,22 +51,24 @@ fn test_rss_channel_metadata() {
 #[test]
 fn test_rss_single_article() {
     let generator = ressic::generator::Rss20::new();
-    let article = Article {
-        title: "First Article".into(),
-        content: "This is the content of the first article.".into(),
-        id: "article-1".into(),
-        url: "https://example.com/article-1".into(),
-        summary: "A brief summary".into(),
-        pub_date: Utc.with_ymd_and_hms(2026, 1, 15, 12, 30, 0).unwrap(),
-    };
+    let article = Article::new(
+        "First Article".into(),
+        "This is the content of the first article.".into(),
+        "article-1".into(),
+        "https://example.com/article-1".into(),
+        "A brief summary".into(),
+        Utc.with_ymd_and_hms(2026, 1, 15, 12, 30, 0).unwrap(),
+    )
+    .unwrap();
 
-    let feed = Feed {
-        name: "test".into(),
-        title: "Test Feed".into(),
-        link: "https://example.com".into(),
-        description: "Test feed description".into(),
-        articles: vec![article],
-    };
+    let feed = Feed::new(
+        "test".into(),
+        "Test Feed".into(),
+        "https://example.com".into(),
+        "Test feed description".into(),
+        vec![article],
+    )
+    .unwrap();
 
     let output = generator.generate(&feed).expect("Failed to generate RSS");
 
@@ -91,39 +95,43 @@ fn test_rss_single_article() {
 fn test_rss_multiple_articles() {
     let generator = ressic::generator::Rss20::new();
     let articles = vec![
-        Article {
-            title: "Article One".into(),
-            content: "Content one".into(),
-            id: "1".into(),
-            url: "https://example.com/1".into(),
-            summary: "Summary one".into(),
-            pub_date: Utc.with_ymd_and_hms(2026, 1, 15, 10, 0, 0).unwrap(),
-        },
-        Article {
-            title: "Article Two".into(),
-            content: "Content two".into(),
-            id: "2".into(),
-            url: "https://example.com/2".into(),
-            summary: "Summary two".into(),
-            pub_date: Utc.with_ymd_and_hms(2026, 1, 15, 11, 0, 0).unwrap(),
-        },
-        Article {
-            title: "Article Three".into(),
-            content: "Content three".into(),
-            id: "3".into(),
-            url: "https://example.com/3".into(),
-            summary: "Summary three".into(),
-            pub_date: Utc.with_ymd_and_hms(2026, 1, 15, 12, 0, 0).unwrap(),
-        },
+        Article::new(
+            "Article One".into(),
+            "Content one".into(),
+            "1".into(),
+            "https://example.com/1".into(),
+            "Summary one".into(),
+            Utc.with_ymd_and_hms(2026, 1, 15, 10, 0, 0).unwrap(),
+        )
+        .unwrap(),
+        Article::new(
+            "Article Two".into(),
+            "Content two".into(),
+            "2".into(),
+            "https://example.com/2".into(),
+            "Summary two".into(),
+            Utc.with_ymd_and_hms(2026, 1, 15, 11, 0, 0).unwrap(),
+        )
+        .unwrap(),
+        Article::new(
+            "Article Three".into(),
+            "Content three".into(),
+            "3".into(),
+            "https://example.com/3".into(),
+            "Summary three".into(),
+            Utc.with_ymd_and_hms(2026, 1, 15, 12, 0, 0).unwrap(),
+        )
+        .unwrap(),
     ];
 
-    let feed = Feed {
-        name: "multi".into(),
-        title: "Multi Article Feed".into(),
-        link: "https://example.com".into(),
-        description: "Feed with multiple articles".into(),
+    let feed = Feed::new(
+        "multi".into(),
+        "Multi Article Feed".into(),
+        "https://example.com".into(),
+        "Feed with multiple articles".into(),
         articles,
-    };
+    )
+    .unwrap();
 
     let output = generator.generate(&feed).expect("Failed to generate RSS");
 
@@ -140,22 +148,24 @@ fn test_rss_multiple_articles() {
 #[test]
 fn test_rss_xml_escaping() {
     let generator = ressic::generator::Rss20::new();
-    let article = Article {
-        title: "Article with <special> & \"chars\"".into(),
-        content: "Content with <tags> & entities".into(),
-        id: "special-1".into(),
-        url: "https://example.com/special?param=value&other=123".into(),
-        summary: "Summary with <html> & \"quotes\"".into(),
-        pub_date: Utc.with_ymd_and_hms(2026, 1, 15, 12, 0, 0).unwrap(),
-    };
+    let article = Article::new(
+        "Article with <special> & \"chars\"".into(),
+        "Content with <tags> & entities".into(),
+        "special-1".into(),
+        "https://example.com/special?param=value&other=123".into(),
+        "Summary with <html> & \"quotes\"".into(),
+        Utc.with_ymd_and_hms(2026, 1, 15, 12, 0, 0).unwrap(),
+    )
+    .unwrap();
 
-    let feed = Feed {
-        name: "test".into(),
-        title: "Feed with <special> & \"characters\"".into(),
-        link: "https://example.com".into(),
-        description: "Description with & and < characters".into(),
-        articles: vec![article],
-    };
+    let feed = Feed::new(
+        "test".into(),
+        "Feed with <special> & \"characters\"".into(),
+        "https://example.com".into(),
+        "Description with & and < characters".into(),
+        vec![article],
+    )
+    .unwrap();
 
     let output = generator.generate(&feed).expect("Failed to generate RSS");
 
@@ -190,22 +200,24 @@ fn test_rss_xml_escaping() {
 #[test]
 fn test_rss_date_format() {
     let generator = ressic::generator::Rss20::new();
-    let article = Article {
-        title: "Test Article".into(),
-        content: "Content".into(),
-        id: "1".into(),
-        url: "https://example.com/1".into(),
-        summary: "Summary".into(),
-        pub_date: Utc.with_ymd_and_hms(2026, 1, 15, 14, 30, 45).unwrap(),
-    };
+    let article = Article::new(
+        "Test Article".into(),
+        "Content".into(),
+        "1".into(),
+        "https://example.com/1".into(),
+        "Summary".into(),
+        Utc.with_ymd_and_hms(2026, 1, 15, 14, 30, 45).unwrap(),
+    )
+    .unwrap();
 
-    let feed = Feed {
-        name: "test".into(),
-        title: "Test Feed".into(),
-        link: "https://example.com".into(),
-        description: "Test".into(),
-        articles: vec![article],
-    };
+    let feed = Feed::new(
+        "test".into(),
+        "Test Feed".into(),
+        "https://example.com".into(),
+        "Test".into(),
+        vec![article],
+    )
+    .unwrap();
 
     let output = generator.generate(&feed).expect("Failed to generate RSS");
 
@@ -237,13 +249,14 @@ fn test_rss_format_name() {
 #[test]
 fn test_rss_empty_feed() {
     let generator = ressic::generator::Rss20::new();
-    let feed = Feed {
-        name: "empty".into(),
-        title: "Empty Feed".into(),
-        link: "https://example.com".into(),
-        description: "A feed with no articles".into(),
-        articles: vec![],
-    };
+    let feed = Feed::new(
+        "empty".into(),
+        "Empty Feed".into(),
+        "https://example.com".into(),
+        "A feed with no articles".into(),
+        vec![],
+    )
+    .unwrap();
 
     let output = generator.generate(&feed).expect("Failed to generate RSS");
 

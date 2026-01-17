@@ -51,11 +51,16 @@ impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {
     /// # Arguments
     ///
     /// * `feed` - The name of the feed to store the article in
-    /// * `article` - The article to store
+    /// * `article` - The article to store. Must be pre-validated using `Article::new()`.
     ///
     /// # Errors
     ///
     /// Returns a `StorageError` if the article cannot be stored.
+    ///
+    /// # Note
+    ///
+    /// The client expects pre-validated models. Articles should be created using
+    /// `Article::new()` to ensure all validation rules are applied before storage.
     pub fn store_article(&mut self, feed_name: &str, article: Article) -> Result<(), StorageError> {
         self.storage.store_article(feed_name, article)
     }

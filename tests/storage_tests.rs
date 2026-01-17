@@ -16,14 +16,15 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
     storage
         .store_article(
             "test",
-            Article {
-                title: title.into(),
-                content: content.into(),
-                id: id.into(),
-                url: "https://example.com/article".into(),
-                summary: "Test summary".into(),
+            Article::new(
+                title.into(),
+                content.into(),
+                id.into(),
+                "https://example.com/article".into(),
+                "Test summary".into(),
                 pub_date,
-            },
+            )
+            .unwrap(),
         )
         .expect("store_article failed");
 
@@ -34,14 +35,15 @@ fn assert_store_then_get_all<S: FeedStorage>(storage: S) {
         1,
         "expected exactly one stored article"
     );
-    let expected = Article {
-        title: title.into(),
-        content: content.into(),
-        id: id.into(),
-        url: "https://example.com/article".into(),
-        summary: "Test summary".into(),
+    let expected = Article::new(
+        title.into(),
+        content.into(),
+        id.into(),
+        "https://example.com/article".into(),
+        "Test summary".into(),
         pub_date,
-    };
+    )
+    .unwrap();
     assert_eq!(&feed.articles[0], &expected);
 }
 
@@ -71,14 +73,15 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
     storage
         .store_article(
             "feed_one",
-            Article {
-                title: "unique".into(),
-                content: "body".into(),
-                id: "100".into(),
-                url: "https://example.com/unique".into(),
-                summary: "unique summary".into(),
-                pub_date: Utc.with_ymd_and_hms(2024, 2, 1, 12, 0, 0).unwrap(),
-            },
+            Article::new(
+                "unique".into(),
+                "body".into(),
+                "100".into(),
+                "https://example.com/unique".into(),
+                "unique summary".into(),
+                Utc.with_ymd_and_hms(2024, 2, 1, 12, 0, 0).unwrap(),
+            )
+            .unwrap(),
         )
         .expect("store_article failed");
 
@@ -109,14 +112,15 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
     storage
         .store_article(
             "test",
-            Article {
-                title: "First title".into(),
-                content: "First content".into(),
-                id: "1".into(),
-                url: url.into(),
-                summary: "First summary".into(),
-                pub_date: pub_date1,
-            },
+            Article::new(
+                "First title".into(),
+                "First content".into(),
+                "1".into(),
+                url.into(),
+                "First summary".into(),
+                pub_date1,
+            )
+            .unwrap(),
         )
         .expect("store_article failed");
 
@@ -125,14 +129,15 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
     storage
         .store_article(
             "test",
-            Article {
-                title: "Second title".into(),
-                content: "Second content".into(),
-                id: "2".into(),
-                url: url.into(),
-                summary: "Second summary".into(),
-                pub_date: pub_date2,
-            },
+            Article::new(
+                "Second title".into(),
+                "Second content".into(),
+                "2".into(),
+                url.into(),
+                "Second summary".into(),
+                pub_date2,
+            )
+            .unwrap(),
         )
         .expect("store_article failed");
 
@@ -146,14 +151,15 @@ fn assert_deduplication<S: FeedStorage>(storage: S) {
     );
 
     // The second article should have replaced the first
-    let expected = Article {
-        title: "Second title".into(),
-        content: "Second content".into(),
-        id: "2".into(),
-        url: url.into(),
-        summary: "Second summary".into(),
-        pub_date: pub_date2,
-    };
+    let expected = Article::new(
+        "Second title".into(),
+        "Second content".into(),
+        "2".into(),
+        url.into(),
+        "Second summary".into(),
+        pub_date2,
+    )
+    .unwrap();
     assert_eq!(&feed.articles[0], &expected);
 }
 
@@ -179,14 +185,15 @@ fn assert_invalid_feed_names<S: FeedStorage>(storage: S) {
     for name in invalid_names {
         let result = storage.store_article(
             name,
-            Article {
-                title: "test".into(),
-                content: "test".into(),
-                id: "1".into(),
-                url: "https://example.com/test".into(),
-                summary: "test summary".into(),
-                pub_date: Utc.with_ymd_and_hms(2024, 4, 1, 14, 0, 0).unwrap(),
-            },
+            Article::new(
+                "test".into(),
+                "test".into(),
+                "1".into(),
+                "https://example.com/test".into(),
+                "test summary".into(),
+                Utc.with_ymd_and_hms(2024, 4, 1, 14, 0, 0).unwrap(),
+            )
+            .unwrap(),
         );
         assert!(
             matches!(result, Err(StorageError::InvalidFeedName(_))),
@@ -213,42 +220,45 @@ fn assert_list_feeds<S: FeedStorage>(storage: S) {
     storage
         .store_article(
             "feed_a",
-            Article {
-                title: "Article A".into(),
-                content: "Content A".into(),
-                id: "a1".into(),
-                url: "https://example.com/a".into(),
-                summary: "Summary A".into(),
-                pub_date: Utc.with_ymd_and_hms(2024, 5, 1, 10, 0, 0).unwrap(),
-            },
+            Article::new(
+                "Article A".into(),
+                "Content A".into(),
+                "a1".into(),
+                "https://example.com/a".into(),
+                "Summary A".into(),
+                Utc.with_ymd_and_hms(2024, 5, 1, 10, 0, 0).unwrap(),
+            )
+            .unwrap(),
         )
         .expect("store_article failed");
 
     storage
         .store_article(
             "feed_b",
-            Article {
-                title: "Article B".into(),
-                content: "Content B".into(),
-                id: "b1".into(),
-                url: "https://example.com/b".into(),
-                summary: "Summary B".into(),
-                pub_date: Utc.with_ymd_and_hms(2024, 5, 2, 11, 0, 0).unwrap(),
-            },
+            Article::new(
+                "Article B".into(),
+                "Content B".into(),
+                "b1".into(),
+                "https://example.com/b".into(),
+                "Summary B".into(),
+                Utc.with_ymd_and_hms(2024, 5, 2, 11, 0, 0).unwrap(),
+            )
+            .unwrap(),
         )
         .expect("store_article failed");
 
     storage
         .store_article(
             "feed_c",
-            Article {
-                title: "Article C".into(),
-                content: "Content C".into(),
-                id: "c1".into(),
-                url: "https://example.com/c".into(),
-                summary: "Summary C".into(),
-                pub_date: Utc.with_ymd_and_hms(2024, 5, 3, 12, 0, 0).unwrap(),
-            },
+            Article::new(
+                "Article C".into(),
+                "Content C".into(),
+                "c1".into(),
+                "https://example.com/c".into(),
+                "Summary C".into(),
+                Utc.with_ymd_and_hms(2024, 5, 3, 12, 0, 0).unwrap(),
+            )
+            .unwrap(),
         )
         .expect("store_article failed");
 

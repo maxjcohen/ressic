@@ -44,22 +44,24 @@ async fn test_post_and_get_rss() {
     let server_url = spawn_test_server().await;
 
     // Create a feed with an article
-    let article = Article {
-        title: "Test Article".to_string(),
-        content: "This is test content".to_string(),
-        id: "test-1".to_string(),
-        url: "http://example.com/test-1".to_string(),
-        summary: "Test summary".to_string(),
-        pub_date: Utc::now(),
-    };
+    let article = Article::new(
+        "Test Article".to_string(),
+        "This is test content".to_string(),
+        "test-1".to_string(),
+        "http://example.com/test-1".to_string(),
+        "Test summary".to_string(),
+        Utc::now(),
+    )
+    .unwrap();
 
-    let feed = Feed {
-        name: "testfeed".to_string(),
-        title: "Test Feed".to_string(),
-        link: "http://example.com".to_string(),
-        description: "A test feed".to_string(),
-        articles: vec![article.clone()],
-    };
+    let feed = Feed::new(
+        "testfeed".to_string(),
+        "Test Feed".to_string(),
+        "http://example.com".to_string(),
+        "A test feed".to_string(),
+        vec![article.clone()],
+    )
+    .unwrap();
 
     // POST the feed
     let client = reqwest::Client::new();
@@ -93,21 +95,23 @@ async fn test_list_feeds() {
     let server_url = spawn_test_server().await;
 
     // Create two feeds
-    let feed1 = Feed {
-        name: "feed1".to_string(),
-        title: "Feed One".to_string(),
-        link: "http://example.com".to_string(),
-        description: "First feed".to_string(),
-        articles: vec![],
-    };
+    let feed1 = Feed::new(
+        "feed1".to_string(),
+        "Feed One".to_string(),
+        "http://example.com".to_string(),
+        "First feed".to_string(),
+        vec![],
+    )
+    .unwrap();
 
-    let feed2 = Feed {
-        name: "feed2".to_string(),
-        title: "Feed Two".to_string(),
-        link: "http://example.com".to_string(),
-        description: "Second feed".to_string(),
-        articles: vec![],
-    };
+    let feed2 = Feed::new(
+        "feed2".to_string(),
+        "Feed Two".to_string(),
+        "http://example.com".to_string(),
+        "Second feed".to_string(),
+        vec![],
+    )
+    .unwrap();
 
     let client = reqwest::Client::new();
 
@@ -145,6 +149,7 @@ async fn test_list_feeds() {
 async fn test_invalid_feed_name() {
     let server_url = spawn_test_server().await;
 
+    // Note: Using struct literal here to bypass validation - we're testing API validation
     let feed = Feed {
         name: "invalid@feed".to_string(),
         title: "Invalid Feed".to_string(),
