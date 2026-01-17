@@ -57,7 +57,7 @@ curl -X POST http://localhost:3000/v1/feeds/myfeed \
 
 2. List currently stored feeds
 ```bash
-curl -X GET http://localhost:3000/v1/feeds
+curl -X GET http://localhost:3000/v1/feeds/
 ```
 
 3. Get an RSS feed for the article we just pushed
