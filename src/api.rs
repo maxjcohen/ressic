@@ -38,7 +38,7 @@ fn validate_feed_name(name: &str) -> Result<(), String> {
     Ok(())
 }
 
-/// POST /v1/feed/:feed_name
+/// POST /v1/feeds/:feed_name
 ///
 /// Adds articles to a feed. The request body should contain a Feed object with
 /// metadata and a list of articles. Feed metadata will be replaced if the feed
@@ -109,7 +109,7 @@ pub async fn post_feed<S: FeedStorage, G: FeedGenerator>(
     Ok(StatusCode::OK)
 }
 
-/// GET /v1/feed/
+/// GET /v1/feeds/
 ///
 /// Returns a JSON array of all stored feed names
 pub async fn list_feeds<S: FeedStorage, G: FeedGenerator>(

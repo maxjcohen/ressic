@@ -76,8 +76,8 @@ pub fn create_app<S: FeedStorage + Send + 'static, G: FeedGenerator + Send + 'st
     client: Arc<Mutex<Client<S, G>>>,
 ) -> Router {
     Router::new()
-        .route("/v1/feed/:feed_name", post(api::post_feed::<S, G>))
-        .route("/v1/feed/", get(api::list_feeds::<S, G>))
+        .route("/v1/feeds/:feed_name", post(api::post_feed::<S, G>))
+        .route("/v1/feeds/", get(api::list_feeds::<S, G>))
         .route("/v1/rss/:feed_name", get(api::get_rss::<S, G>))
         .with_state(client)
 }

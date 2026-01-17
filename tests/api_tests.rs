@@ -64,7 +64,7 @@ async fn test_post_and_get_rss() {
     // POST the feed
     let client = reqwest::Client::new();
     let response = client
-        .post(&format!("{}/v1/feed/testfeed", server_url))
+        .post(&format!("{}/v1/feeds/testfeed", server_url))
         .json(&feed)
         .send()
         .await
@@ -113,14 +113,14 @@ async fn test_list_feeds() {
 
     // POST both feeds
     client
-        .post(&format!("{}/v1/feed/feed1", server_url))
+        .post(&format!("{}/v1/feeds/feed1", server_url))
         .json(&feed1)
         .send()
         .await
         .unwrap();
 
     client
-        .post(&format!("{}/v1/feed/feed2", server_url))
+        .post(&format!("{}/v1/feeds/feed2", server_url))
         .json(&feed2)
         .send()
         .await
@@ -128,7 +128,7 @@ async fn test_list_feeds() {
 
     // GET the list of feeds
     let response = client
-        .get(&format!("{}/v1/feed/", server_url))
+        .get(&format!("{}/v1/feeds/", server_url))
         .send()
         .await
         .unwrap();
@@ -155,7 +155,7 @@ async fn test_invalid_feed_name() {
 
     let client = reqwest::Client::new();
     let response = client
-        .post(&format!("{}/v1/feed/invalid@feed", server_url))
+        .post(&format!("{}/v1/feeds/invalid@feed", server_url))
         .json(&feed)
         .send()
         .await
