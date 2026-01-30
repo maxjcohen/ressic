@@ -14,18 +14,24 @@ Ressic allows clients to POST article data to HTTP endpoints, where each endpoin
 - Minimal dependencies and portable design
 
 ## Quick Start
-### Prerequisites
+### Container (Docker/Podman)
+These instructions for Podman also work with Docker.
+```bash
+$ podman build -t ressic .
+$ podman run --rm -p 3000:3000 ressic
+```
+
+### Building
+Prerequisites:
 - Rust 1.80+ (edition 2024)
 - Cargo
 
-### Installation
 Clone the repository and build the project:
-
 ```bash
 cargo build --release
 ```
 
-### Running the Application
+Runn the application with:
 ```bash
 cargo run
 ```
