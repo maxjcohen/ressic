@@ -23,8 +23,41 @@ async fn main() {
 
     println!("Ressic server listening on http://{}:{}", address, port);
 
-    // Start the server
+    // Start the server with graceful shutdown
     axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
         .await
         .expect("Server failed to start");
+
+    println!("Server shut down gracefully");
+}
+
+async fn shutdown_signal() {
+    use tokio::signal;
+
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("Failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("Failed to install SIGTERM handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {
+            println!("Received Ctrl+C signal");
+        },
+        _ = terminate => {
+            println!("Received SIGTERM signal");
+        },
+    }
 }
