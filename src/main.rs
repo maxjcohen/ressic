@@ -14,12 +14,14 @@ async fn main() {
     // Create the Axum router
     let app = create_app(shared_client);
 
-    // Bind to localhost:3000
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+    // Bind server
+    let address = "0.0.0.0";
+    let port = 3000;
+    let listener = tokio::net::TcpListener::bind(format!("{}:{}", address, port))
         .await
         .expect("Failed to bind to address");
 
-    println!("Ressic server listening on http://127.0.0.1:3000");
+    println!("Ressic server listening on http://{}:{}", address, port);
 
     // Start the server
     axum::serve(listener, app)
