@@ -8,5 +8,5 @@
             ]
         }
     },
-    "postCreateCommand": "rustc --version && cargo --version"
+    "postCreateCommand": "rustup component add rustfmt"
 }
