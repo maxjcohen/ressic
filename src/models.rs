@@ -209,6 +209,9 @@ impl Article {
 #[derive(Debug, PartialEq, Eq, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Feed {
     /// The name identifier for the feed (used internally).
+    /// When deserializing from a POST request body, this field is ignored in favour
+    /// of the feed name present in the URL path.
+    #[serde(default)]
     pub name: String,
     /// The title of the feed (RSS channel title).
     pub title: String,

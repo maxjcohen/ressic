@@ -43,7 +43,6 @@ This will start the application using the default feed storage location.
 curl -X POST http://localhost:3000/v1/feeds/myfeed \
      -H "Content-Type: application/json" \
      -d '{
-           "name": "myfeed",
            "title": "My Feed",
            "link": "http://example.com",
            "description": "This is my feed",
