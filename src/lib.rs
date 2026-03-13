@@ -46,11 +46,11 @@ impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {
 
     /// Stores an article in the specified feed.
     ///
-    /// If an article with the same ID already exists, it will be replaced.
+    /// If an article with the same URL already exists, it will be replaced.
     ///
     /// # Arguments
     ///
-    /// * `feed` - The name of the feed to store the article in
+    /// * `feed_name` - The name of the feed to store the article in.
     /// * `article` - The article to store. Must be pre-validated using `Article::new()`.
     ///
     /// # Errors
