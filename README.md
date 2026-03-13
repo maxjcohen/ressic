@@ -6,11 +6,10 @@ A minimal, self-hosted web service for managing RSS feeds via HTTP endpoints.
 Ressic allows clients to POST article data to HTTP endpoints, where each endpoint corresponds to an RSS feed name. The service appends incoming articles to the chosen feed and exposes the RSS feed for consumption by standard aggregators.
 
 ## Features
-- Simple HTTP API for posting articles to feeds
+- Simple REST API for posting articles to feeds
 - Automatic RSS feed generation
-- File-based storage (JSONL format)
+- File-based storage
 - Article deduplication by URL
-- Feed isolation - each feed is independent
 - Minimal dependencies and portable design
 
 ## Quick Start
@@ -31,7 +30,7 @@ Clone the repository and build the project:
 cargo build --release
 ```
 
-Runn the application with:
+Run the application with:
 ```bash
 cargo run
 ```
@@ -75,8 +74,8 @@ curl -X GET http://localhost:3000/v1/rss/myfeed
 ## Data Model
 
 ### Storage
-#### Local Json files
-Feed data is stored in the `feeds/` directory at the project root. Each feed is stored as a separate Json file:
+#### Local JSON files
+Feed data is stored in the `feeds/` directory at the project root. Each feed is stored as a separate JSON file:
 
 ```
 feeds/
@@ -98,7 +97,7 @@ Articles contain the following fields:
 ### Feed Behavior
 - **Deduplication**: Articles are deduplicated by URL. If an article with the same URL is posted again, it replaces the previous one.
 - **Ordering**: When retrieving articles, the most recent article (by `pub_date`) is prioritized.
-- **Isolation**: Each feed is independent. Articles posted to one feed do not appear in others.
+- **Isolation**: Each feed is stored independently.
 
 ## Development
 ### Project Structure
