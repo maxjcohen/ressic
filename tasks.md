@@ -80,7 +80,7 @@ Use this file as your only source of context: relevant information from a task M
   - Fix: add a `ClientError` enum in `src/lib.rs` with `Storage(StorageError)` and `Generator(GeneratorError)` variants, plus `From` impls. Change `generate_feed` signature to `Result<String, ClientError>`. Add `impl From<ClientError> for ApiError` in `src/api.rs`. Add tests for the error path (e.g. calling `generate_feed` on a non-existent feed returns `ClientError::Storage(StorageError::FeedNotFound)`).
   - Done when: `cargo test` passes and `generate_feed` contains no `.unwrap()`.
 
-- [ ] **T4 — Fix `.unwrap()` panic in `Client::generate_feed`**
+- [x] **T4 — Fix `.unwrap()` panic in `Client::generate_feed`**
   - File: `src/lib.rs`, method `Client::generate_feed`
   - Problem: `self.storage.get_feed(feed_name).unwrap()` panics if the feed does not exist.
   - Prerequisite: T3 (`ClientError` must exist).
