@@ -98,23 +98,21 @@ Use this file as your only source of context: relevant information from a task M
 ### Design / Architecture
 
 - [ ] **T6 — Fix N+1 reads/writes on POST — add `put_feed` to `FeedStorage`**
-  - Files: `src/storage/mod.rs` (trait), `src/storage/local.rs`, `src/storage/mock.rs`, `src/api.rs`
+  - Files: `src/storage/mod.rs` (trait), `src/storage/local.rs`, `src/storage/mock.rs`, `src/lib.rs`, `src/api.rs`, `tests/storage_tests.rs`
   - Problem: `post_feed` with N articles does N+1 reads and N+1 writes: one `set_feed_metadata` (read+write) plus one `store_article` (read+write) per article.
-  - Fix: add `fn put_feed(&self, feed: &Feed) -> Result<(), StorageError>` to the `FeedStorage` trait. In `JsonLocalStorage`, implement it as a single atomic read-merge-write. In `MockStorage`, implement as no-op. Update `post_feed` in `api.rs` to validate all articles first, then call `put_feed` once. Add tests for `put_feed`.
-  - Note: completing this task makes T7 (`set_feed_metadata` signature) and T8 (struct literal fallbacks) either fully superseded or significantly simpler — reassess T7 and T8 after T6 is done.
-  - Done when: `cargo test` passes and `post_feed` calls storage exactly once.
+  - Fix: add `fn put_feed(&self, feed: &Feed) -> Result<(), StorageError>` to `FeedStorage`. Semantics: read existing feed (FeedNotFound → empty), merge incoming articles by URL-dedup (incoming wins), overwrite metadata, write atomically. Remove `store_article` and `set_feed_metadata` from the trait and all impls (superseded). Remove `Client::store_article` from `src/lib.rs`. Update `post_feed` in `api.rs` to call `put_feed` once. Rewrite `tests/storage_tests.rs` to use `put_feed`; add tests for `put_feed` (creates new feed, updates metadata, deduplicates across calls).
+  - Note: removes `store_article` and `set_feed_metadata` entirely — T7 and T8 are resolved by this task.
+  - Done when: `cargo test` passes, `store_article` and `set_feed_metadata` are absent from `src/`, and `post_feed` calls storage exactly once.
 
-- [ ] **T7 — Fix `set_feed_metadata` signature** *(reassess after T6 — may be dropped)*
-  - Files: `src/storage/mod.rs`, `src/storage/local.rs`, `src/storage/mock.rs`, `src/api.rs`
-  - Problem: `set_feed_metadata(&self, feed_name: &str, feed: &Feed)` takes a full `Feed` but only uses `title`, `link`, and `description`; articles in the argument are silently ignored. This is a leaky API.
-  - Prerequisite: T6. If T6 replaces all usage of `set_feed_metadata` with `put_feed`, this trait method can simply be removed. If it still has uses, replace the `feed: &Feed` parameter with individual fields or a dedicated `FeedMetadata { title, link, description }` struct.
-  - Done when: `set_feed_metadata` either no longer exists or its signature no longer accepts unused data.
+- [ ] **T7 — Remove `set_feed_metadata` from `FeedStorage`** *(resolved by T6)*
+  - Prerequisite: T6.
+  - Resolution: `set_feed_metadata` is removed as part of T6. No separate action needed.
+  - Done when: T6 is complete.
 
-- [ ] **T8 — Remove invalid `Feed` struct literal fallbacks in storage** *(reassess after T6)*
-  - File: `src/storage/local.rs` — `store_article` and `set_feed_metadata`
-  - Problem: both methods construct `Feed { link: "".to_string(), ... }` directly as a not-found fallback, bypassing `Feed::new()` validation and creating instances with empty required fields. The fallback in `store_article` is dangerous: the expected call order is `set_feed_metadata` first, so `store_article` silently creates a corrupt feed when called out of order.
-  - Prerequisite: T6. If `put_feed` replaces both methods, these fallbacks disappear automatically. Otherwise, remove the fallback in `store_article` (return `StorageError::FeedNotFound` instead); the fallback in `set_feed_metadata` can use `Feed::new()` with defaults or also be removed.
-  - Done when: no direct `Feed { ... }` struct literals remain in `local.rs`.
+- [ ] **T8 — Remove `store_article` struct literal fallbacks** *(resolved by T6)*
+  - Prerequisite: T6.
+  - Resolution: both `store_article` and `set_feed_metadata` (which contained the struct literal fallbacks) are removed as part of T6. No separate action needed.
+  - Done when: T6 is complete.
 
 - [ ] **T9 — Stop bypassing `Client` in `api.rs`**
   - Files: `src/api.rs`, `src/lib.rs`
@@ -157,11 +155,9 @@ Use this file as your only source of context: relevant information from a task M
   - Fix: return the temp directory path from `spawn_test_server` alongside the server URL. At the end of each `#[tokio::test]`, call `std::fs::remove_dir_all` on it. Alternatively, use a drop guard struct.
   - Done when: no `feeds-test/api_test_*` directories remain after `cargo test`.
 
-- [ ] **T15 — Change `Client::store_article` signature from `&mut self` to `&self`**
-  - File: `src/lib.rs`
-  - Problem: `pub fn store_article(&mut self, ...)` uses `&mut self` but `FeedStorage::store_article` takes `&self` (interior mutability). The `&mut` is unnecessary and inconsistent.
-  - Fix: change to `&self`.
-  - Done when: `cargo test` passes and `store_article` on `Client` takes `&self`.
+- [ ] **T15 — Change `Client::store_article` signature from `&mut self` to `&self`** *(superseded by T6)*
+  - Resolution: `Client::store_article` is removed entirely in T6. This task is dropped.
+  - Done when: T6 is complete.
 
 - [ ] **T16 — Use field shorthand in `Client::new`**
   - File: `src/lib.rs`, `Client::new`
