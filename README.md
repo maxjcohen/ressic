@@ -108,17 +108,31 @@ Articles are deduplicated by URL. If an article with the same URL is posted agai
 ### Project Structure
 ```
 src/
-├── lib.rs          # Client interface for feed operations
+├── lib.rs          # Client interface and Axum router setup
 ├── main.rs         # Application entry point
 ├── models.rs       # Data models (Article, Feed)
-└── storage/        # Storage implementations
-    ├── mod.rs      # Storage trait definition
-    ├── local.rs    # Local file storage (JSON)
-    └── mock.rs     # Mock storage for testing
+├── api.rs          # HTTP route handlers
+├── storage/        # Storage implementations
+│   ├── mod.rs      # Storage trait definition
+│   ├── local.rs    # Local file storage (JSON)
+│   └── mock.rs     # Mock storage for testing
+└── generator/      # Feed format generators
+    ├── mod.rs      # Generator trait definition
+    ├── rss20.rs    # RSS 2.0 feed generator
+    ├── plain_text.rs # Plain text feed generator
+    └── mock.rs     # Mock generator for testing
 
 tests/
-├── storage_tests.rs    # Storage backend tests
-├── test_client.rs      # Client tests
-└── common/
-    └── mod.rs          # Test utilities
+├── mod.rs                  # Test module root
+├── api_tests.rs            # API endpoint tests
+├── model_validation_tests.rs # Model validation tests
+├── rss_generator_tests.rs  # RSS generator tests
+├── storage_tests.rs        # Storage backend tests
+├── test_client.rs          # Client tests
+├── common/
+│   └── mod.rs              # Test utilities
+└── generators/
+    ├── mod.rs              # Generator test module
+    ├── rss20_tests.rs      # RSS 2.0 generator tests
+    └── plain_text_tests.rs # Plain text generator tests
 ```
