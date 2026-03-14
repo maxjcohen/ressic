@@ -65,7 +65,7 @@ Use this file as your only source of context: relevant information from a task M
   - Fix: rename variant to `FeedNotFound` everywhere. In `api.rs` the HTTP mapping (`NotFound`) is already correct — only change the message string to `"Feed not found"`. Update any `matches!(result, Err(StorageError::FeedEmpty))` assertions in tests.
   - Done when: `cargo test` passes and `FeedEmpty` no longer appears in the codebase.
 
-- [ ] **T2 — Add `Display` and `Error` impls for `StorageError` and `GeneratorError`**
+- [x] **T2 — Add `Display` and `Error` impls for `StorageError` and `GeneratorError`**
   - Files: `src/storage/mod.rs`, `src/generator/mod.rs`
   - Problem: only `ValidationError` has `Display` + `Error` impls. `StorageError` and `GeneratorError` can only be formatted with `{:?}`. This blocks building a proper `ClientError` wrapper (T3) and is inconsistent with Rust error conventions.
   - Fix: implement `std::fmt::Display` for both (human-readable messages, e.g. `"Feed not found"`, `"IO error: {}"`, `"Serialization error: {}"`). Then add `impl std::error::Error for StorageError` and `impl std::error::Error for GeneratorError`.
@@ -73,7 +73,7 @@ Use this file as your only source of context: relevant information from a task M
 
 ### Critical (panics)
 
-- [ ] **T3 — Introduce `ClientError` wrapping `StorageError` and `GeneratorError`**
+- [x] **T3 — Introduce `ClientError` wrapping `StorageError` and `GeneratorError`**
   - File: `src/lib.rs`
   - Problem: `Client::generate_feed` returns `Result<String, GeneratorError>` but calls `self.storage.get_feed()` which returns `Result<Feed, StorageError>`. There is no way to propagate `StorageError` with the current signature, so `.unwrap()` is used.
   - Prerequisite: T2 (both error types must implement `std::error::Error`).

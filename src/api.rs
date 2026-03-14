@@ -142,6 +142,15 @@ impl From<crate::generator::GeneratorError> for ApiError {
     }
 }
 
+impl From<crate::ClientError> for ApiError {
+    fn from(err: crate::ClientError) -> Self {
+        match err {
+            crate::ClientError::Storage(e) => ApiError::from(e),
+            crate::ClientError::Generator(e) => ApiError::from(e),
+        }
+    }
+}
+
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
         let (status, message) = match self {

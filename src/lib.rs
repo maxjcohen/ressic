@@ -16,6 +16,45 @@ use crate::{
 use axum::{Router, routing::get, routing::post};
 use std::sync::{Arc, Mutex};
 
+/// Errors that can occur in client operations, wrapping storage and generator errors.
+#[derive(Debug)]
+pub enum ClientError {
+    /// A storage-layer error occurred.
+    Storage(StorageError),
+    /// A feed generation error occurred.
+    Generator(GeneratorError),
+}
+
+impl std::fmt::Display for ClientError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ClientError::Storage(e) => write!(f, "Storage error: {}", e),
+            ClientError::Generator(e) => write!(f, "Generator error: {}", e),
+        }
+    }
+}
+
+impl std::error::Error for ClientError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            ClientError::Storage(e) => Some(e),
+            ClientError::Generator(e) => Some(e),
+        }
+    }
+}
+
+impl From<StorageError> for ClientError {
+    fn from(e: StorageError) -> Self {
+        ClientError::Storage(e)
+    }
+}
+
+impl From<GeneratorError> for ClientError {
+    fn from(e: GeneratorError) -> Self {
+        ClientError::Generator(e)
+    }
+}
+
 /// Client for managing RSS feeds.
 ///
 /// The client provides a high-level interface for storing and retrieving
@@ -65,10 +104,16 @@ impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {
         self.storage.store_article(feed_name, article)
     }
 
-    /// Generates an RSS feed (not yet implemented).
-    pub fn generate_feed(&self, feed_name: &str) -> Result<String, GeneratorError> {
-        self.generator
-            .generate(&self.storage.get_feed(feed_name).unwrap())
+    /// Generates an RSS feed for the specified feed name.
+    ///
+    /// # Errors
+    ///
+    /// Returns `ClientError::Storage` if the feed cannot be retrieved, or
+    /// `ClientError::Generator` if feed generation fails.
+    pub fn generate_feed(&self, feed_name: &str) -> Result<String, ClientError> {
+        let feed = self.storage.get_feed(feed_name)?;
+        let output = self.generator.generate(&feed)?;
+        Ok(output)
     }
 }
 
