@@ -11,6 +11,16 @@ pub enum GeneratorError {
     Serialization(String),
 }
 
+impl std::fmt::Display for GeneratorError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            GeneratorError::Serialization(msg) => write!(f, "Serialization error: {}", msg),
+        }
+    }
+}
+
+impl std::error::Error for GeneratorError {}
+
 /// Trait for feed format generators.
 ///
 /// Implementations of this trait convert article collections into

@@ -28,6 +28,27 @@ impl From<serde_json::Error> for StorageError {
     }
 }
 
+impl std::fmt::Display for StorageError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StorageError::Io(e) => write!(f, "IO error: {}", e),
+            StorageError::Json(e) => write!(f, "Serialization error: {}", e),
+            StorageError::FeedNotFound => write!(f, "Feed not found"),
+            StorageError::InvalidFeedName(name) => write!(f, "Invalid feed name: {}", name),
+        }
+    }
+}
+
+impl std::error::Error for StorageError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            StorageError::Io(e) => Some(e),
+            StorageError::Json(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
 /// Trait for feed storage backends.
 ///
 /// Implementations of this trait provide persistent storage for RSS feed articles.
