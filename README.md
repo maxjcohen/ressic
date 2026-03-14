@@ -1,9 +1,17 @@
 # Ressic
 
-A minimal, self-hosted web service for managing RSS feeds via HTTP endpoints.
+A minimal, self-hosted web service for publishing RSS feeds via HTTP endpoints.
 
 ## Overview
-Ressic allows clients to POST article data to HTTP endpoints, where each endpoint corresponds to an RSS feed name. The service appends incoming articles to the chosen feed and exposes the RSS feed for consumption by standard aggregators.
+When a service produces articles meant for an RSS aggregator, it must remain
+continuously available and serve a valid RSS feed on demand. Ressic decouples
+that responsibility: your service simply POSTs articles to Ressic, and Ressic
+handles persistence and feed serving.
+
+Ressic allows clients to POST article data to HTTP endpoints, where each
+endpoint corresponds to an RSS feed name. The service appends incoming articles
+to the chosen feed and exposes the RSS feed for consumption by standard
+aggregators.
 
 ## Features
 - Simple REST API for posting articles to feeds
