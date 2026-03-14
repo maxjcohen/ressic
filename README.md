@@ -16,7 +16,7 @@ aggregators.
 ## Features
 - Simple REST API for posting articles to feeds
 - Automatic RSS feed generation
-- File-based storage
+- Pluggable storage backends (local JSON files by default; SQLite planned)
 - Article deduplication by URL
 - Minimal dependencies and portable design
 
@@ -81,7 +81,10 @@ curl -X GET http://localhost:3000/v1/rss/myfeed
 ## Data Model
 
 ### Storage
-#### Local JSON files
+Ressic uses a `FeedStorage` trait to abstract over storage backends. The active backend is
+selected at startup. Currently implemented backends:
+
+#### Local JSON files (default)
 Feed data is stored in the `feeds/` directory at the project root. Each feed is stored as a separate JSON file:
 
 ```
@@ -90,6 +93,8 @@ feeds/
 ├── tech_news.json
 └── blog_posts.json
 ```
+
+Future backends (e.g. SQLite) can be added by implementing the `FeedStorage` trait defined in `src/storage/mod.rs`.
 
 ### Article
 Articles contain the following fields:
