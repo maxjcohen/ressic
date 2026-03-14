@@ -30,7 +30,7 @@ $ podman run --rm -p 3000:3000 ressic
 
 ### Building
 Prerequisites:
-- Rust 1.80+ (edition 2024)
+- Rust 1.85+ (edition 2024)
 - Cargo
 
 Clone the repository and build the project:
@@ -98,13 +98,11 @@ Articles contain the following fields:
 - `content`: Full article content (required)
 - `id`: Unique identifier within a feed (required)
 - `url`: Original article URL (required, used for deduplication)
-- `summary`: Brief article summary (required)
+- `summary`: Brief article summary
 - `pub_date`: Publication date in UTC (required)
 
 ### Feed Behavior
-- **Deduplication**: Articles are deduplicated by URL. If an article with the same URL is posted again, it replaces the previous one.
-- **Ordering**: When retrieving articles, the most recent article (by `pub_date`) is prioritized.
-- **Isolation**: Each feed is stored independently.
+Articles are deduplicated by URL. If an article with the same URL is posted again, it replaces the previous one.
 
 ## Development
 ### Project Structure
@@ -115,7 +113,7 @@ src/
 ├── models.rs       # Data models (Article, Feed)
 └── storage/        # Storage implementations
     ├── mod.rs      # Storage trait definition
-    ├── local.rs    # Local file storage (JSONL)
+    ├── local.rs    # Local file storage (JSON)
     └── mock.rs     # Mock storage for testing
 
 tests/
