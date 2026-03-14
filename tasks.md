@@ -114,7 +114,7 @@ Use this file as your only source of context: relevant information from a task M
   - Resolution: both `store_article` and `set_feed_metadata` (which contained the struct literal fallbacks) are removed as part of T6. No separate action needed.
   - Done when: T6 is complete.
 
-- [ ] **T9 — Stop bypassing `Client` in `api.rs`**
+- [x] **T9 — Stop bypassing `Client` in `api.rs`**
   - Files: `src/api.rs`, `src/lib.rs`
   - Problem: all three handlers access `client.storage.*` and `client.generator.*` directly. This makes `Client` a passive container rather than the intended abstraction layer. The methods `Client::list_feeds` and `Client::generate_feed` already exist but are not used by the handlers.
   - Prerequisite: T6 (handlers need a `put_feed`-based method on `Client`), T4 (handlers need to call `generate_feed` without it panicking).

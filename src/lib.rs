@@ -10,6 +10,7 @@ pub mod storage;
 
 use crate::{
     generator::{FeedGenerator, GeneratorError},
+    models::Feed,
     storage::{FeedStorage, StorageError},
 };
 use axum::{Router, routing::get, routing::post};
@@ -80,6 +81,24 @@ impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {
 
     pub fn list_feeds(&self) -> Result<Vec<String>, StorageError> {
         self.storage.list_feeds()
+    }
+
+    /// Stores or updates a feed atomically.
+    ///
+    /// Reads the existing feed (treating `FeedNotFound` as empty), merges incoming
+    /// articles by URL (incoming wins on conflict), overwrites metadata, then writes.
+    ///
+    /// # Errors
+    ///
+    /// Returns `ClientError::Storage` if the storage operation fails.
+    pub fn put_feed(&self, feed: &Feed) -> Result<(), ClientError> {
+        self.storage.put_feed(feed)?;
+        Ok(())
+    }
+
+    /// Returns the MIME type produced by this client's generator.
+    pub fn mime_type(&self) -> &'static str {
+        self.generator.mime_type()
     }
 
     /// Generates an RSS feed for the specified feed name.

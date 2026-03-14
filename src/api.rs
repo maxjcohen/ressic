@@ -48,7 +48,7 @@ pub async fn post_feed<S: FeedStorage, G: FeedGenerator>(
         .lock()
         .map_err(|_| ApiError::InternalError("Server state corrupted".to_string()))?;
 
-    client.storage.put_feed(&validated_feed)?;
+    client.put_feed(&validated_feed)?;
     for article in &validated_feed.articles {
         println!("Added article '{}' to feed '{}'", article.title, feed_name);
     }
@@ -66,7 +66,7 @@ pub async fn list_feeds<S: FeedStorage, G: FeedGenerator>(
     let client = client
         .lock()
         .map_err(|_| ApiError::InternalError("Server state corrupted".to_string()))?;
-    let feeds = client.storage.list_feeds()?;
+    let feeds = client.list_feeds()?;
     Ok(Json(feeds))
 }
 
@@ -81,12 +81,8 @@ pub async fn get_rss<S: FeedStorage, G: FeedGenerator>(
         .lock()
         .map_err(|_| ApiError::InternalError("Server state corrupted".to_string()))?;
 
-    // Get the feed - storage layer will validate feed name
-    let feed = client.storage.get_feed(&feed_name)?;
-
-    // Generate RSS
-    let rss_content = client.generator.generate(&feed)?;
-    let mime_type = client.generator.mime_type();
+    let rss_content = client.generate_feed(&feed_name)?;
+    let mime_type = client.mime_type();
 
     Ok(([(axum::http::header::CONTENT_TYPE, mime_type)], rss_content).into_response())
 }
