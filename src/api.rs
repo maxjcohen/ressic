@@ -115,7 +115,7 @@ impl From<crate::storage::StorageError> for ApiError {
     fn from(err: crate::storage::StorageError) -> Self {
         use crate::storage::StorageError;
         match err {
-            StorageError::FeedEmpty => ApiError::NotFound("Feed is empty".to_string()),
+            StorageError::FeedNotFound => ApiError::NotFound("Feed not found".to_string()),
             StorageError::Io(e) => {
                 // Check if it's a "file not found" error
                 if e.kind() == std::io::ErrorKind::NotFound {

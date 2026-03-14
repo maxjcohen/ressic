@@ -122,11 +122,11 @@ impl JsonLocalStorage {
     fn read_feed(&self, feed_name: &str) -> Result<Feed, StorageError> {
         // Validate feed name and construct path
         let feed_path = self.feed_path(feed_name)?;
-        // Attempt to read feed, return FeedEmpty if not found
+        // Attempt to read feed, return FeedNotFound if not found
         let f = match File::open(&feed_path) {
             Ok(file) => file,
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-                return Err(StorageError::FeedEmpty);
+                return Err(StorageError::FeedNotFound);
             }
             Err(e) => return Err(StorageError::Io(e)),
         };
@@ -149,7 +149,7 @@ impl JsonLocalStorage {
 
 impl FeedStorage for JsonLocalStorage {
     fn get_feed(&self, feed_name: &str) -> Result<Feed, StorageError> {
-        // Attempt to read existing feed; if not found, return FeedEmpty error
+        // Attempt to read existing feed; if not found, return FeedNotFound error
         Ok(self.read_feed(feed_name)?)
     }
 

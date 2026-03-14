@@ -50,13 +50,16 @@ T16 (use field shorthand)          — independent
 T17 (consolidate RSS tests)        — independent
 ```
 
+## Development
+Use this file as your only source of context: relevant information from a task MUST be added to this file in concise and precise wordings. 
+
 ---
 
 ## Tasks
 
 ### Naming / Semantics (do first — other tasks reference these names)
 
-- [ ] **T1 — Rename `FeedEmpty` to `FeedNotFound`**
+- [x] **T1 — Rename `FeedEmpty` to `FeedNotFound`**
   - Files: `src/storage/mod.rs`, `src/storage/local.rs`, `src/api.rs`, all test files that match on this variant
   - Problem: `StorageError::FeedEmpty` is returned when a feed *file does not exist*, not when the feed has zero articles. An empty feed (0 articles) is a valid state. The wrong name causes the API to respond `"Feed is empty"` when the real situation is "feed doesn't exist".
   - Fix: rename variant to `FeedNotFound` everywhere. In `api.rs` the HTTP mapping (`NotFound`) is already correct — only change the message string to `"Feed not found"`. Update any `matches!(result, Err(StorageError::FeedEmpty))` assertions in tests.

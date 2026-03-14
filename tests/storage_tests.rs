@@ -54,10 +54,10 @@ fn localfile_store_then_get_all() {
     });
 }
 
-// Test that get_latest_article returns FeedEmpty error for empty feeds.
+// Test that get_latest_article returns FeedNotFound error for non-existent feeds.
 fn assert_empty_feed_error<S: FeedStorage>(storage: S) {
     let result = storage.get_feed("empty_feed");
-    assert!(matches!(result, Err(StorageError::FeedEmpty)));
+    assert!(matches!(result, Err(StorageError::FeedNotFound)));
 }
 
 #[test]
@@ -85,9 +85,9 @@ fn assert_isolated_between_feeds<S: FeedStorage>(storage: S) {
         )
         .expect("store_article failed");
 
-    // Read from a different feed; expect FeedEmpty error
+    // Read from a different feed; expect FeedNotFound error
     let result = storage.get_feed("feed_two");
-    assert!(matches!(result, Err(StorageError::FeedEmpty)));
+    assert!(matches!(result, Err(StorageError::FeedNotFound)));
     // Also verify that feed_one has the article
     let feed_one = storage.get_feed("feed_one").expect("get_feed failed");
     assert_eq!(feed_one.articles.len(), 1);

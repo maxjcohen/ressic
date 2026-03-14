@@ -11,7 +11,7 @@ pub enum StorageError {
     /// A JSON serialization/deserialization error occurred.
     Json(serde_json::Error),
     /// The requested feed contains no articles.
-    FeedEmpty,
+    FeedNotFound,
     /// The feed name contains invalid characters or is unsafe.
     InvalidFeedName(String),
 }
@@ -35,7 +35,7 @@ impl From<serde_json::Error> for StorageError {
 pub trait FeedStorage {
     /// Retrieves all articles from the specified feed.
     ///
-    /// Returns a `FeedEmpty` error if the feed contains no articles.
+    /// Returns a `FeedNotFound` error if the feed does not exist.
     fn get_feed(&self, feed_name: &str) -> Result<Feed, StorageError>;
 
     /// Retrieve the name of all stored feeds.
