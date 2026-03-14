@@ -61,9 +61,9 @@ impl From<GeneratorError> for ClientError {
 /// articles, abstracting over the specific storage implementation.
 pub struct Client<S: FeedStorage, G: FeedGenerator> {
     /// The storage backend used by this client.
-    pub storage: S,
+    storage: S,
     /// The feed generator.
-    pub generator: G,
+    generator: G,
 }
 
 impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {

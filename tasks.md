@@ -128,7 +128,7 @@ Use this file as your only source of context: relevant information from a task M
   - Fix: perform all `Article::new` and `Feed::new` validation before acquiring the lock. Acquire the lock only for the call(s) to `Client` storage methods.
   - Done when: in `post_feed`, `client.lock()` is called after all validation, not before.
 
-- [ ] **T11 — Make `Client` fields private**
+- [x] **T11 — Make `Client` fields private**
   - File: `src/lib.rs` — `pub storage`, `pub generator`
   - Problem: both fields are `pub` solely because `api.rs` bypasses `Client` methods. Public fields prevent enforcing invariants.
   - Prerequisite: T9 (handlers must stop accessing fields directly).
