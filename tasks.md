@@ -135,7 +135,7 @@ Use this file as your only source of context: relevant information from a task M
   - Fix: remove `pub` from both field declarations.
   - Done when: `storage` and `generator` are private and `cargo test` passes.
 
-- [ ] **T12 — Align feed name validation between model and storage layers**
+- [x] **T12 — Align feed name validation between model and storage layers**
   - Files: `src/models.rs` `Feed::new`, `src/storage/local.rs` `JsonLocalStorage::validate_feed_name`
   - Problem: `Feed::new` allows only alphanumeric, `-`, `_`. `JsonLocalStorage::validate_feed_name` allows any printable non-path character (so `test@feed` passes storage but would have been rejected at the model layer). The storage guard should be at least as strict as the model guard.
   - Fix: update `JsonLocalStorage::validate_feed_name` to apply the same whitelist: `c.is_alphanumeric() || c == '-' || c == '_'`.

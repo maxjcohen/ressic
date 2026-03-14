@@ -191,6 +191,8 @@ fn assert_invalid_feed_names<S: FeedStorage>(storage: S) {
         "path\\with\\backslash",
         "",
         ".hidden",
+        "test@feed",
+        "feed name",
     ];
 
     for name in invalid_names {

@@ -12,8 +12,8 @@ use std::path::{Path, PathBuf};
 ///
 /// # Security
 ///
-/// Feed names are validated to prevent path traversal attacks. Invalid feed names will be rejected
-/// during operations. See [`validate_feed_name`](Self::validate_feed_name) for validation rules.
+/// Feed names are validated against a strict whitelist (alphanumeric, hyphens, underscores only)
+/// matching the `Feed::new` validation rules. Invalid feed names will be rejected during operations.
 ///
 /// # Thread Safety
 ///
@@ -53,12 +53,8 @@ impl JsonLocalStorage {
 
     /// Validates that a feed name is safe for use in file paths.
     ///
-    /// Prevents path traversal attacks by rejecting feed names containing:
-    /// - Path separators (/, \)
-    /// - Parent directory references (..)
-    /// - Hidden files (.)
-    /// - Control characters
-    /// - Empty strings
+    /// Enforces the same whitelist as `Feed::new`: only alphanumeric characters,
+    /// hyphens, and underscores are allowed. Empty strings are also rejected.
     fn validate_feed_name(feed_name: &str) -> Result<(), StorageError> {
         if feed_name.is_empty() {
             return Err(StorageError::InvalidFeedName(
@@ -66,27 +62,14 @@ impl JsonLocalStorage {
             ));
         }
 
-        // Reject if contains path separators or parent references
-        if feed_name.contains('/') || feed_name.contains('\\') || feed_name.contains("..") {
+        if !feed_name
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+        {
             return Err(StorageError::InvalidFeedName(format!(
-                "Feed name contains invalid path characters: {}",
+                "Feed name must contain only alphanumeric characters, hyphens, and underscores: {}",
                 feed_name
             )));
-        }
-
-        // Reject if starts with dot (hidden files)
-        if feed_name.starts_with('.') {
-            return Err(StorageError::InvalidFeedName(format!(
-                "Feed name cannot start with '.': {}",
-                feed_name
-            )));
-        }
-
-        // Reject control characters and non-printable ASCII
-        if feed_name.chars().any(|c| c.is_control()) {
-            return Err(StorageError::InvalidFeedName(
-                "Feed name contains control characters".to_string(),
-            ));
         }
 
         Ok(())
