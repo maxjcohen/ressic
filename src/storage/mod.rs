@@ -1,4 +1,4 @@
-use crate::models::{Article, Feed};
+use crate::models::Feed;
 
 pub mod local;
 pub mod mock;
@@ -62,13 +62,11 @@ pub trait FeedStorage {
     /// Retrieve the name of all stored feeds.
     fn list_feeds(&self) -> Result<Vec<String>, StorageError>;
 
-    /// Stores an article in the specified feed.
+    /// Stores or updates a feed atomically.
     ///
-    /// If an article with the same URL already exists, it will be replaced.
-    fn store_article(&self, feed_name: &str, article: Article) -> Result<(), StorageError>;
-
-    /// Set feed metadata.
-    fn set_feed_metadata(&self, feed_name: &str, feed: &Feed) -> Result<(), StorageError>;
+    /// Reads the existing feed (treating `FeedNotFound` as empty), merges incoming
+    /// articles by URL (incoming wins on conflict), overwrites metadata, then writes.
+    fn put_feed(&self, feed: &Feed) -> Result<(), StorageError>;
 }
 
 pub use local::JsonLocalStorage;

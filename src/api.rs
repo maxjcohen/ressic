@@ -48,14 +48,8 @@ pub async fn post_feed<S: FeedStorage, G: FeedGenerator>(
         .lock()
         .map_err(|_| ApiError::InternalError("Server state corrupted".to_string()))?;
 
-    // Set feed metadata
-    client
-        .storage
-        .set_feed_metadata(&feed_name, &validated_feed)?;
-
-    // Store each article
+    client.storage.put_feed(&validated_feed)?;
     for article in &validated_feed.articles {
-        client.storage.store_article(&feed_name, article.clone())?;
         println!("Added article '{}' to feed '{}'", article.title, feed_name);
     }
 

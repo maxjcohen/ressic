@@ -10,7 +10,6 @@ pub mod storage;
 
 use crate::{
     generator::{FeedGenerator, GeneratorError},
-    models::Article,
     storage::{FeedStorage, StorageError},
 };
 use axum::{Router, routing::get, routing::post};
@@ -81,27 +80,6 @@ impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {
 
     pub fn list_feeds(&self) -> Result<Vec<String>, StorageError> {
         self.storage.list_feeds()
-    }
-
-    /// Stores an article in the specified feed.
-    ///
-    /// If an article with the same URL already exists, it will be replaced.
-    ///
-    /// # Arguments
-    ///
-    /// * `feed_name` - The name of the feed to store the article in.
-    /// * `article` - The article to store. Must be pre-validated using `Article::new()`.
-    ///
-    /// # Errors
-    ///
-    /// Returns a `StorageError` if the article cannot be stored.
-    ///
-    /// # Note
-    ///
-    /// The client expects pre-validated models. Articles should be created using
-    /// `Article::new()` to ensure all validation rules are applied before storage.
-    pub fn store_article(&mut self, feed_name: &str, article: Article) -> Result<(), StorageError> {
-        self.storage.store_article(feed_name, article)
     }
 
     /// Generates an RSS feed for the specified feed name.

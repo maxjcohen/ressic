@@ -1,5 +1,5 @@
 use super::{FeedStorage, StorageError};
-use crate::models::{Article, Feed};
+use crate::models::Feed;
 use std::fs::{File, OpenOptions};
 use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
@@ -157,36 +157,31 @@ impl FeedStorage for JsonLocalStorage {
         self.list_stored_feeds()
     }
 
-    fn store_article(&self, feed_name: &str, article: Article) -> Result<(), StorageError> {
-        // Read existing, dedupe by url, update or append, then rewrite file
-        // Attempt to read existing feed; if not found, start new feed
-        let mut feed = self.read_feed(feed_name).unwrap_or(Feed {
-            name: feed_name.to_string(),
-            title: feed_name.to_string(),
-            link: "".to_string(),
-            description: format!("Default description for {}", feed_name),
-            articles: vec![],
-        });
-        if let Some(a) = feed.articles.iter_mut().find(|a| a.url == article.url) {
-            *a = article;
-        } else {
-            feed.articles.push(article);
-        }
-        self.write_feed(feed_name, &feed)
-    }
+    fn put_feed(&self, feed: &Feed) -> Result<(), StorageError> {
+        // Read existing articles; treat FeedNotFound as an empty list.
+        let existing_articles = match self.read_feed(&feed.name) {
+            Ok(existing) => existing.articles,
+            Err(StorageError::FeedNotFound) => vec![],
+            Err(e) => return Err(e),
+        };
 
-    fn set_feed_metadata(&self, feed_name: &str, feed: &Feed) -> Result<(), StorageError> {
-        // Attempt to read existing feed; if not found, start new feed
-        let mut existing_feed = self.read_feed(feed_name).unwrap_or(Feed {
-            name: feed_name.to_string(),
-            title: "".to_string(),
-            link: "".to_string(),
-            description: "".to_string(),
-            articles: vec![],
-        });
-        existing_feed.title = feed.title.clone();
-        existing_feed.link = feed.link.clone();
-        existing_feed.description = feed.description.clone();
-        self.write_feed(feed_name, &existing_feed)
+        // Merge: existing articles first, incoming wins on URL conflict.
+        let mut merged = existing_articles;
+        for incoming in &feed.articles {
+            if let Some(existing_article) = merged.iter_mut().find(|a| a.url == incoming.url) {
+                *existing_article = incoming.clone();
+            } else {
+                merged.push(incoming.clone());
+            }
+        }
+
+        let merged_feed = Feed {
+            name: feed.name.clone(),
+            title: feed.title.clone(),
+            link: feed.link.clone(),
+            description: feed.description.clone(),
+            articles: merged,
+        };
+        self.write_feed(&feed.name, &merged_feed)
     }
 }
