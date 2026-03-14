@@ -121,7 +121,7 @@ Use this file as your only source of context: relevant information from a task M
   - Fix: add `pub fn post_feed(&self, feed_name: &str, feed: Feed) -> Result<(), ClientError>` (or equivalent) to `Client`. Rewrite handlers to call only `Client` methods. Validation can remain in the handler layer (before the lock) or move into the client method.
   - Done when: handlers in `api.rs` contain no `.storage.` or `.generator.` field accesses.
 
-- [ ] **T10 — Acquire lock after validation in `post_feed`**
+- [x] **T10 — Acquire lock after validation in `post_feed`**
   - File: `src/api.rs`, `post_feed`
   - Problem: the `Mutex<Client>` guard is acquired before article/feed validation and held through all I/O, serializing all concurrent requests behind file operations.
   - Prerequisite: T9 (once bypassing is removed, the lock boundary becomes a clean choice).
