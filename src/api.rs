@@ -44,7 +44,9 @@ pub async fn post_feed<S: FeedStorage, G: FeedGenerator>(
         validated_articles,
     )?;
 
-    let client = client.lock().unwrap();
+    let client = client
+        .lock()
+        .map_err(|_| ApiError::InternalError("Server state corrupted".to_string()))?;
 
     // Set feed metadata
     client
@@ -67,7 +69,9 @@ pub async fn post_feed<S: FeedStorage, G: FeedGenerator>(
 pub async fn list_feeds<S: FeedStorage, G: FeedGenerator>(
     State(client): State<SharedClient<S, G>>,
 ) -> Result<Json<Vec<String>>, ApiError> {
-    let client = client.lock().unwrap();
+    let client = client
+        .lock()
+        .map_err(|_| ApiError::InternalError("Server state corrupted".to_string()))?;
     let feeds = client.storage.list_feeds()?;
     Ok(Json(feeds))
 }
@@ -79,7 +83,9 @@ pub async fn get_rss<S: FeedStorage, G: FeedGenerator>(
     Path(feed_name): Path<String>,
     State(client): State<SharedClient<S, G>>,
 ) -> Result<Response, ApiError> {
-    let client = client.lock().unwrap();
+    let client = client
+        .lock()
+        .map_err(|_| ApiError::InternalError("Server state corrupted".to_string()))?;
 
     // Get the feed - storage layer will validate feed name
     let feed = client.storage.get_feed(&feed_name)?;

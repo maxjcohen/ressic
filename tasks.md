@@ -51,6 +51,7 @@ T17 (consolidate RSS tests)        — independent
 ```
 
 ## Development
+Handle each task one at a time, without starting subsequent tasks.
 Use this file as your only source of context: relevant information from a task MUST be added to this file in concise and precise wordings. 
 
 ---
@@ -87,7 +88,7 @@ Use this file as your only source of context: relevant information from a task M
   - Fix: replace `.unwrap()` with `?`. The `?` operator now propagates through `ClientError`.
   - Done when: `src/lib.rs` `generate_feed` contains no `.unwrap()` and `cargo test` passes.
 
-- [ ] **T5 — Handle mutex poisoning in all handlers**
+- [x] **T5 — Handle mutex poisoning in all handlers**
   - Files: `src/api.rs` — all three handlers (`post_feed`, `list_feeds`, `get_rss`)
   - Problem: every handler calls `client.lock().unwrap()`. If any handler panics while holding the lock, the mutex becomes poisoned; every subsequent request panics, effectively killing the server.
   - Prerequisite: T4 (the main panic source must be removed first, otherwise this is addressing a symptom).
