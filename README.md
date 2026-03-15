@@ -131,7 +131,6 @@ tests/
 ├── mod.rs                  # Test module root
 ├── api_tests.rs            # API endpoint tests
 ├── model_validation_tests.rs # Model validation tests
-├── rss_generator_tests.rs  # RSS generator tests
 ├── storage_tests.rs        # Storage backend tests
 ├── test_client.rs          # Client tests
 ├── common/

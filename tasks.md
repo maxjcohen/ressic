@@ -165,8 +165,8 @@ Use this file as your only source of context: relevant information from a task M
   - Fix: change to `Client { storage, generator }`.
   - Done when: the initialiser uses shorthand syntax.
 
-- [ ] **T17 — Consolidate duplicate RSS generator tests**
+- [x] **T17 — Consolidate duplicate RSS generator tests**
   - Files: `tests/rss_generator_tests.rs`, `tests/generators/rss20_tests.rs`, `tests/generators/mod.rs`
   - Problem: `tests/rss_generator_tests.rs` already has extensive RSS 2.0 tests. `tests/generators/rss20_tests.rs` only contains a trivial `is_ok()` check that is a strict subset. Having two locations causes confusion about where new tests should go.
-  - Fix: delete `tests/generators/rss20_tests.rs`. Remove the `mod rss20_tests;` line from `tests/generators/mod.rs`. Verify `tests/generators/plain_text_tests.rs` still compiles.
-  - Done when: `tests/generators/rss20_tests.rs` no longer exists and `cargo test` passes.
+  - Fix: move all test functions from `tests/rss_generator_tests.rs` into `tests/generators/rss20_tests.rs` (add required imports; keep the existing `test_generate` call). Delete `tests/rss_generator_tests.rs`. Leave `tests/generators/mod.rs` unchanged.
+  - Done when: `tests/rss_generator_tests.rs` no longer exists, all RSS 2.0 tests live in `tests/generators/rss20_tests.rs`, and `cargo test` passes.
