@@ -143,7 +143,7 @@ Use this file as your only source of context: relevant information from a task M
 
 ### Minor / Style
 
-- [ ] **T13 — Remove unused `tower-http` dependency**
+- [x] **T13 — Remove unused `tower-http` dependency**
   - File: `Cargo.toml`
   - Problem: `tower-http = { version = "0.5", features = ["trace"] }` is listed in `[dependencies]` but never imported in any source file.
   - Fix: delete that line from `Cargo.toml`. Run `cargo build` to confirm.
