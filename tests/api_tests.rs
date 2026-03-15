@@ -195,3 +195,34 @@ async fn test_get_nonexistent_feed() {
     // Should return 404 Not Found
     assert_eq!(response.status(), 404);
 }
+
+#[tokio::test]
+async fn test_docs_endpoint() {
+    let (server_url, _temp_dir) = spawn_test_server().await;
+
+    let client = reqwest::Client::new();
+    let response = client
+        .get(&format!("{}/docs", server_url))
+        .send()
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), 200);
+}
+
+#[tokio::test]
+async fn test_openapi_json_endpoint() {
+    let (server_url, _temp_dir) = spawn_test_server().await;
+
+    let client = reqwest::Client::new();
+    let response = client
+        .get(&format!("{}/openapi.json", server_url))
+        .send()
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), 200);
+    let body: serde_json::Value = response.json().await.unwrap();
+    assert!(body.get("openapi").is_some());
+    assert!(body.get("paths").is_some());
+}

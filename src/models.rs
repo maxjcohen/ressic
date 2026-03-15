@@ -89,7 +89,7 @@ impl std::error::Error for ValidationError {}
 /// - `id` must not be empty (after trimming whitespace)
 /// - `url` must not be empty (after trimming whitespace)
 /// - `summary` can be empty (optional description)
-#[derive(Debug, PartialEq, Eq, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, serde::Serialize, serde::Deserialize, utoipa::ToSchema)]
 pub struct Article {
     /// The title of the article.
     pub title: String,
@@ -206,7 +206,7 @@ impl Article {
 /// - `link` must not be empty (after trimming whitespace)
 /// - `description` must not be empty (after trimming whitespace)
 /// - `articles` can be any Vec<Article> (including empty)
-#[derive(Debug, PartialEq, Eq, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, serde::Serialize, serde::Deserialize, utoipa::ToSchema)]
 pub struct Feed {
     /// The name identifier for the feed (used internally).
     /// When deserializing from a POST request body, this field is ignored in favour

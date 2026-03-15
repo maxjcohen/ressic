@@ -10,6 +10,8 @@ chrono = { version = "0.4", features = ["serde"] }
 axum = "0.7"
 tokio = { version = "1.0", features = ["full"] }
 tower = "0.4"
+utoipa = { version = "4", features = ["axum_extras", "chrono"] }
+utoipa-redoc = { version = "4", features = ["axum"] }
 
 [dev-dependencies]
 reqwest = { version = "0.11", features = ["json"] }

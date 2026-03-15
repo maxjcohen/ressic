@@ -15,6 +15,8 @@ use crate::{
 };
 use axum::{Router, routing::get, routing::post};
 use std::sync::{Arc, Mutex};
+use utoipa::OpenApi;
+use utoipa_redoc::{Redoc, Servable};
 
 /// Errors that can occur in client operations, wrapping storage and generator errors.
 #[derive(Debug)]
@@ -116,6 +118,14 @@ impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {
 /// # Arguments
 ///
 /// * `client` - The shared client instance to use for all requests
+#[derive(OpenApi)]
+#[openapi(
+    info(title = "Ressic", version = "0.1.0"),
+    paths(api::post_feed, api::list_feeds, api::get_rss),
+    components(schemas(models::Article, models::Feed))
+)]
+struct ApiDoc;
+
 pub fn create_app<S: FeedStorage + Send + 'static, G: FeedGenerator + Send + 'static>(
     client: Arc<Mutex<Client<S, G>>>,
 ) -> Router {
@@ -124,4 +134,9 @@ pub fn create_app<S: FeedStorage + Send + 'static, G: FeedGenerator + Send + 'st
         .route("/v1/feeds/", get(api::list_feeds::<S, G>))
         .route("/v1/rss/:feed_name", get(api::get_rss::<S, G>))
         .with_state(client)
+        .merge(Redoc::with_url("/docs", ApiDoc::openapi()))
+        .route(
+            "/openapi.json",
+            get(|| async { axum::Json(ApiDoc::openapi()) }),
+        )
 }

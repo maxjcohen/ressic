@@ -15,6 +15,20 @@ pub type SharedClient<S, G> = Arc<Mutex<Client<S, G>>>;
 /// Adds articles to a feed. The request body should contain a Feed object with
 /// metadata and a list of articles. Feed metadata will be replaced if the feed
 /// already exists.
+#[utoipa::path(
+    post,
+    path = "/v1/feeds/{feed_name}",
+    tag = "feeds",
+    params(
+        ("feed_name" = String, Path, description = "Name of the feed to update")
+    ),
+    request_body = Feed,
+    responses(
+        (status = 200, description = "Feed updated successfully"),
+        (status = 400, description = "Invalid request body or feed name"),
+        (status = 500, description = "Internal server error"),
+    )
+)]
 pub async fn post_feed<S: FeedStorage, G: FeedGenerator>(
     Path(feed_name): Path<String>,
     State(client): State<SharedClient<S, G>>,
@@ -60,6 +74,15 @@ pub async fn post_feed<S: FeedStorage, G: FeedGenerator>(
 /// GET /v1/feeds/
 ///
 /// Returns a JSON array of all stored feed names
+#[utoipa::path(
+    get,
+    path = "/v1/feeds/",
+    tag = "feeds",
+    responses(
+        (status = 200, description = "List of feed names", body = Vec<String>),
+        (status = 500, description = "Internal server error"),
+    )
+)]
 pub async fn list_feeds<S: FeedStorage, G: FeedGenerator>(
     State(client): State<SharedClient<S, G>>,
 ) -> Result<Json<Vec<String>>, ApiError> {
@@ -73,6 +96,19 @@ pub async fn list_feeds<S: FeedStorage, G: FeedGenerator>(
 /// GET /v1/rss/:feed_name
 ///
 /// Returns the RSS feed for the specified feed name
+#[utoipa::path(
+    get,
+    path = "/v1/rss/{feed_name}",
+    tag = "feeds",
+    params(
+        ("feed_name" = String, Path, description = "Name of the feed to retrieve")
+    ),
+    responses(
+        (status = 200, description = "RSS 2.0 XML feed content"),
+        (status = 404, description = "Feed not found"),
+        (status = 500, description = "Internal server error"),
+    )
+)]
 pub async fn get_rss<S: FeedStorage, G: FeedGenerator>(
     Path(feed_name): Path<String>,
     State(client): State<SharedClient<S, G>>,
