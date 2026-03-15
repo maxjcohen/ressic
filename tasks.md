@@ -149,7 +149,7 @@ Use this file as your only source of context: relevant information from a task M
   - Fix: delete that line from `Cargo.toml`. Run `cargo build` to confirm.
   - Done when: `tower-http` does not appear in `Cargo.toml`.
 
-- [ ] **T14 — Clean up API test temp directories**
+- [x] **T14 — Clean up API test temp directories**
   - File: `tests/api_tests.rs`, `spawn_test_server`
   - Problem: each test creates a `feeds-test/api_test_{timestamp}` directory that is never deleted. The `common::with_localfile_storage` helper used by storage tests does cleanup, but the API tests skip it.
   - Fix: return the temp directory path from `spawn_test_server` alongside the server URL. At the end of each `#[tokio::test]`, call `std::fs::remove_dir_all` on it. Alternatively, use a drop guard struct.

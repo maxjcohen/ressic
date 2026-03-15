@@ -8,9 +8,20 @@ use ressic::{
 use std::sync::{Arc, Mutex};
 use tokio::net::TcpListener;
 
-/// Helper function to create a test server instance
-/// Returns the server address and a handle to join the server task
-async fn spawn_test_server() -> String {
+/// Drop guard that removes its directory when it goes out of scope.
+struct TempDir {
+    path: String,
+}
+
+impl Drop for TempDir {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.path);
+    }
+}
+
+/// Helper function to create a test server instance.
+/// Returns the server URL and a `TempDir` guard; the directory is deleted when the guard drops.
+async fn spawn_test_server() -> (String, TempDir) {
     // Use a unique test directory for each test
     let test_dir = format!(
         "feeds-test/api_test_{}",
@@ -36,12 +47,12 @@ async fn spawn_test_server() -> String {
     // Give the server a moment to start
     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
 
-    format!("http://{}", addr)
+    (format!("http://{}", addr), TempDir { path: test_dir })
 }
 
 #[tokio::test]
 async fn test_post_and_get_rss() {
-    let server_url = spawn_test_server().await;
+    let (server_url, _temp_dir) = spawn_test_server().await;
 
     // Create a feed with an article
     let article = Article::new(
@@ -92,7 +103,7 @@ async fn test_post_and_get_rss() {
 
 #[tokio::test]
 async fn test_list_feeds() {
-    let server_url = spawn_test_server().await;
+    let (server_url, _temp_dir) = spawn_test_server().await;
 
     // Create two feeds
     let feed1 = Feed::new(
@@ -147,7 +158,7 @@ async fn test_list_feeds() {
 
 #[tokio::test]
 async fn test_invalid_feed_name() {
-    let server_url = spawn_test_server().await;
+    let (server_url, _temp_dir) = spawn_test_server().await;
 
     // Note: Using struct literal here to bypass validation - we're testing API validation
     let feed = Feed {
@@ -172,7 +183,7 @@ async fn test_invalid_feed_name() {
 
 #[tokio::test]
 async fn test_get_nonexistent_feed() {
-    let server_url = spawn_test_server().await;
+    let (server_url, _temp_dir) = spawn_test_server().await;
 
     let client = reqwest::Client::new();
     let response = client
