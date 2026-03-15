@@ -72,10 +72,6 @@ impl FeedGenerator for Rss20 {
     fn mime_type(&self) -> &'static str {
         "application/rss+xml"
     }
-
-    fn format_name(&self) -> &'static str {
-        "rss-2.0"
-    }
 }
 
 /// Escapes special XML characters in text content.

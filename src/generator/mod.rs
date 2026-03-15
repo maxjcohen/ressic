@@ -51,11 +51,6 @@ pub trait FeedGenerator {
     /// - Atom: "application/atom+xml"
     /// - JSON Feed: "application/feed+json"
     fn mime_type(&self) -> &'static str;
-
-    /// Returns the format name/identifier.
-    ///
-    /// Examples: "rss-2.0", "atom-1.0", "json-feed"
-    fn format_name(&self) -> &'static str;
 }
 
 pub use mock::Mock;

@@ -247,12 +247,6 @@ fn test_rss_mime_type() {
 }
 
 #[test]
-fn test_rss_format_name() {
-    let generator = Rss20::new();
-    assert_eq!(generator.format_name(), "rss-2.0");
-}
-
-#[test]
 fn test_rss_empty_feed() {
     let generator = Rss20::new();
     let feed = Feed::new(

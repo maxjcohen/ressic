@@ -42,8 +42,4 @@ impl FeedGenerator for PlainText {
     fn mime_type(&self) -> &'static str {
         "text/plain"
     }
-
-    fn format_name(&self) -> &'static str {
-        "plain-text"
-    }
 }
