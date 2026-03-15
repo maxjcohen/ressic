@@ -73,10 +73,7 @@ impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {
     ///
     /// * `storage` - The storage backend to use for persisting articles
     pub fn new(storage: S, generator: G) -> Self {
-        Client {
-            storage: storage,
-            generator: generator,
-        }
+        Client { storage, generator }
     }
 
     pub fn list_feeds(&self) -> Result<Vec<String>, StorageError> {

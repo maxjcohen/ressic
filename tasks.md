@@ -159,7 +159,7 @@ Use this file as your only source of context: relevant information from a task M
   - Resolution: `Client::store_article` is removed entirely in T6. This task is dropped.
   - Done when: T6 is complete.
 
-- [ ] **T16 — Use field shorthand in `Client::new`**
+- [x] **T16 — Use field shorthand in `Client::new`**
   - File: `src/lib.rs`, `Client::new`
   - Problem: `Client { storage: storage, generator: generator }` does not use Rust's field shorthand.
   - Fix: change to `Client { storage, generator }`.
