@@ -22,7 +22,12 @@ handles persistence and feed serving.
 
 ### Container (Docker/Podman)
 
-These instructions for Podman also work with Docker.
+These instructions for Podman also work with Docker. Pull the image from GitHub Container Registry and run it:
+```bash
+podman run --rm -p 3000:3000 -v ./feeds:/app/feeds ghcr.io/maxjcohen/ressic:latest
+```
+
+Or build the image locally and run it:
 ```bash
 podman build -t ressic .
 podman run --rm -p 3000:3000 -v ./feeds:/app/feeds ressic
