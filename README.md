@@ -120,7 +120,8 @@ again, it replaces the previous one.
 
 
 ## API
-TODO
+The documentation for the API is served on `/docs` based on
+[redocs](https://redocly.github.io/redoc/)
 
 ## Development
 
