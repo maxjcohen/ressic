@@ -120,11 +120,17 @@ impl<S: FeedStorage, G: FeedGenerator> Client<S, G> {
 /// * `client` - The shared client instance to use for all requests
 #[derive(OpenApi)]
 #[openapi(
-    info(title = "Ressic", version = "0.1.0"),
+    info(title = "Ressic", version = ""),
     paths(api::post_feed, api::list_feeds, api::get_rss),
     components(schemas(models::Article, models::Feed))
 )]
 struct ApiDoc;
+
+fn openapi() -> utoipa::openapi::OpenApi {
+    let mut api = ApiDoc::openapi();
+    api.info.version = env!("CARGO_PKG_VERSION").to_string();
+    api
+}
 
 pub fn create_app<S: FeedStorage + Send + 'static, G: FeedGenerator + Send + 'static>(
     client: Arc<Mutex<Client<S, G>>>,
@@ -134,9 +140,6 @@ pub fn create_app<S: FeedStorage + Send + 'static, G: FeedGenerator + Send + 'st
         .route("/v1/feeds/", get(api::list_feeds::<S, G>))
         .route("/v1/rss/:feed_name", get(api::get_rss::<S, G>))
         .with_state(client)
-        .merge(Redoc::with_url("/docs", ApiDoc::openapi()))
-        .route(
-            "/openapi.json",
-            get(|| async { axum::Json(ApiDoc::openapi()) }),
-        )
+        .merge(Redoc::with_url("/docs", openapi()))
+        .route("/openapi.json", get(|| async { axum::Json(openapi()) }))
 }
