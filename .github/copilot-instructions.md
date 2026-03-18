@@ -1,9 +1,9 @@
 Start by reading the README for information about the project, its goals and implementation design. Then, follow the instructions below to implement the project according to the specified requirements and development guidelines.
 
 ### Functional Requirements
-- Accept POST requests at `/v1/:feed_name` containing article content
+- Accept POST requests at `/v1/feeds/:feed_name` containing article content
 - Add each new post to the corresponding `feed_name` RSS feed
-- Make each feed available at `/rss/:feed_name.xml` for traditional aggregators
+- Make each feed available at `/v1/rss/:feed_name.xml` for traditional aggregators
 
 ## Development
 ### Test, Develop and Run

@@ -15,7 +15,7 @@ handles persistence and feed serving.
    feeds are retrieved via HTTP GET in RSS format.
 2. **Minimal dependencies and portability**: few external dependencies to limit
    code maintenance workload.
-3. **Limited feature set**: no authentication or user management is planned;
+3. **Intentionally limited feature set**: no authentication or user management is planned;
    article deduplication is the only article-level logic.
 
 ## Quick Start
@@ -25,7 +25,7 @@ handles persistence and feed serving.
 These instructions for Podman also work with Docker.
 ```bash
 podman build -t ressic .
-podman run --rm -p 3000:3000 ressic
+podman run --rm -p 3000:3000 -v ./feeds:/app/feeds ressic
 ```
 
 ### Building
@@ -44,7 +44,10 @@ Run the application with:
 cargo run
 ```
 
-This starts the application using the default feed storage location.
+This starts the application on port `:3000` using the default feed storage location `./feeds`.
+
+### Configuration
+Most deployment options, such as port number and feed storage location, will be configurable soon^TM. 
 
 ## Example usage
 1. Add a new feed
@@ -77,7 +80,6 @@ curl -X GET http://localhost:3000/v1/feeds/
 ```bash
 curl -X GET http://localhost:3000/v1/rss/myfeed
 ```
-
 
 ## Data Model
 
@@ -112,12 +114,11 @@ Articles contain the following fields:
 - `content`: Full article content (required)
 - `id`: Unique identifier within a feed (required)
 - `url`: Original article URL (required, used for deduplication)
-- `summary`: Brief article summary
-- `pub_date`: Publication date in UTC (required)
+- `pub_date`: Publication date in UTC (ISO 8601, required)
+- `summary`: Brief article summary (optional)
 
 Articles are deduplicated by URL. If an article with the same URL is posted
 again, it replaces the previous one.
-
 
 ## API
 The documentation for the API is served on `/docs` based on
@@ -161,6 +162,13 @@ Additional directories:
 - `feeds/`: feed data files (JSON format)
 - `feeds-test/`: feed files used during testing
 
+### Running Tests
+Simply through:
+
+```bash
+cargo test
+```
+
 ### Coding Patterns
 
 - Interfaces are modular: `FeedStorage` and `FeedGenerator`.
@@ -170,3 +178,6 @@ Additional directories:
 - Code is documented with clear, concise comments.
 - Each change is committed using [Conventional
   Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+## License
+See [LICENSE](LICENSE) for details.
